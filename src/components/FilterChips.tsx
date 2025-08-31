@@ -33,43 +33,49 @@ const FilterChips: React.FC<FilterChipsProps> = ({
   };
 
   return (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-      <div className="bg-background/95 backdrop-blur-sm rounded-lg border border-border shadow-lg p-3">
+    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-20 animate-fade-in">
+      <div className="bg-background/95 backdrop-blur-md rounded-2xl border border-border/50 shadow-xl p-4 max-w-sm">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-foreground">Filter by Plug Type:</span>
+          <span className="text-sm font-medium text-foreground mb-2 w-full text-center">
+            Filter by Plug Type
+          </span>
           
-          {availablePlugTypes.map((plugType) => {
-            const isSelected = selectedPlugTypes.includes(plugType);
-            return (
-              <Badge
-                key={plugType}
-                variant={isSelected ? "default" : "secondary"}
-                className={cn(
-                  "cursor-pointer transition-all hover:scale-105",
-                  isSelected 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/80" 
-                    : "hover:bg-secondary/80"
-                )}
-                onClick={() => togglePlugType(plugType)}
-              >
-                {plugTypeDisplayNames[plugType] || plugType}
-              </Badge>
-            );
-          })}
+          <div className="flex flex-wrap gap-2 justify-center w-full">
+            {availablePlugTypes.map((plugType) => {
+              const isSelected = selectedPlugTypes.includes(plugType);
+              return (
+                <Badge
+                  key={plugType}
+                  variant={isSelected ? "default" : "secondary"}
+                  className={cn(
+                    "cursor-pointer transition-all duration-300 hover-lift",
+                    isSelected 
+                      ? "bg-primary text-primary-foreground shadow-glow" 
+                      : "hover:bg-secondary/80 hover:shadow-md"
+                  )}
+                  onClick={() => togglePlugType(plugType)}
+                >
+                  {plugTypeDisplayNames[plugType] || plugType}
+                </Badge>
+              );
+            })}
+          </div>
           
           {selectedPlugTypes.length > 0 && (
-            <Badge
-              variant="outline"
-              className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-              onClick={clearAll}
-            >
-              Clear All
-            </Badge>
+            <div className="w-full flex justify-center mt-2">
+              <Badge
+                variant="outline"
+                className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-all duration-300"
+                onClick={clearAll}
+              >
+                Clear All
+              </Badge>
+            </div>
           )}
         </div>
         
         {selectedPlugTypes.length > 0 && (
-          <div className="mt-2 text-xs text-muted-foreground">
+          <div className="mt-3 text-xs text-muted-foreground text-center">
             Showing {selectedPlugTypes.length} of {availablePlugTypes.length} plug types
           </div>
         )}

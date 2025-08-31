@@ -4,7 +4,7 @@ import FilterChips from '@/components/FilterChips';
 import StationDetailsModal from '@/components/StationDetailsModal';
 import { useStations } from '@/hooks/useStations';
 import { Card } from '@/components/ui/card';
-import { Loader2, MapPin } from 'lucide-react';
+import { Loader2, Zap } from 'lucide-react';
 
 interface Station {
   station_id: string;
@@ -47,38 +47,43 @@ const Index = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="p-8 text-center">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-          <h2 className="text-xl font-semibold mb-2">Loading ChargeSure</h2>
-          <p className="text-muted-foreground">Finding charging stations near you...</p>
+        <Card className="p-8 text-center max-w-sm mx-4 animate-fade-in">
+          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Loader2 className="h-6 w-6 animate-spin text-white" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">ChargeSure</h2>
+          <p className="text-muted-foreground">Finding charging stations with certainty...</p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen w-full bg-background">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="flex items-center justify-center py-3 px-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">ChargeSure</h1>
+    <div className="relative h-screen w-full bg-background overflow-hidden">
+      {/* Minimalist Header */}
+      <div className="absolute top-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-lg border-b border-border/30">
+        <div className="flex items-center justify-center py-4 px-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">ChargeSure</h1>
+              <p className="text-xs text-muted-foreground">Charge with Certainty</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Filter Chips */}
-      <div className="absolute top-16 left-0 right-0 z-10 px-4">
-        <FilterChips
-          availablePlugTypes={availablePlugTypes}
-          selectedPlugTypes={selectedPlugTypes}
-          onSelectionChange={setSelectedPlugTypes}
-        />
-      </div>
+      {/* Intelligent Filter Chips */}
+      <FilterChips
+        availablePlugTypes={availablePlugTypes}
+        selectedPlugTypes={selectedPlugTypes}
+        onSelectionChange={setSelectedPlugTypes}
+      />
 
-      {/* Map */}
-      <div className="absolute inset-0 pt-16">
+      {/* Predictive Smart Map */}
+      <div className="absolute inset-0 pt-20">
         <Map
           stations={stations}
           selectedPlugTypes={selectedPlugTypes}
@@ -86,7 +91,7 @@ const Index = () => {
         />
       </div>
 
-      {/* Station Details Modal */}
+      {/* Contextual Station Hub */}
       <StationDetailsModal
         station={selectedStation}
         isOpen={isModalOpen}
