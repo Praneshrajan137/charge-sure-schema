@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -81,6 +82,8 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const navigate = useNavigate();
+  
   if (!station) return null;
 
   const handleGetDirections = () => {
@@ -89,8 +92,8 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   };
 
   const handleUpdateStatus = () => {
-    // TODO: Navigate to UpdateStatusScreen
-    console.log('Navigate to update status for station:', station.station_id);
+    onClose();
+    navigate(`/station/${station.station_id}/update`);
   };
 
   return (
