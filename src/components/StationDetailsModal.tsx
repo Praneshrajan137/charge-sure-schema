@@ -7,8 +7,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Zap, Clock, AlertCircle, CheckCircle, Loader } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { MapPin, Zap, Clock, AlertCircle, CheckCircle, Loader, Navigation, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Charger {
@@ -60,7 +61,7 @@ const getStatusBadgeVariant = (status: string) => {
   }
 };
 
-const formatLastUpdate = (timestamp: string) => {
+const formatTimeAgo = (timestamp: string) => {
   const date = new Date(timestamp);
   const now = new Date();
   const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
@@ -82,100 +83,67 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
 }) => {
   if (!station) return null;
 
-  const statusCounts = station.chargers.reduce((acc, charger) => {
-    acc[charger.current_status] = (acc[charger.current_status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const handleGetDirections = () => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${station.latitude},${station.longitude}`;
+    window.open(url, '_blank');
+  };
 
-  const availableChargers = station.chargers.filter(c => c.current_status === 'Available');
-  const totalChargers = station.chargers.length;
+  const handleUpdateStatus = () => {
+    // TODO: Navigate to UpdateStatusScreen
+    console.log('Navigate to update status for station:', station.station_id);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="bottom" className="h-[80vh] rounded-t-xl">
         <SheetHeader className="pb-4">
-          <SheetTitle className="flex items-center gap-2 text-left">
-            <MapPin className="h-5 w-5 text-primary" />
+          <SheetTitle className="text-xl font-bold">
             {station.name}
           </SheetTitle>
-          <SheetDescription className="text-left">
+          <SheetDescription className="text-muted-foreground">
             {station.address}
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6">
-          {/* Status Overview */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Charging Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <Badge variant="default" className="bg-ev-available text-white">
-                  {statusCounts['Available'] || 0} Available
-                </Badge>
-                <Badge variant="secondary" className="bg-ev-in-use text-white">
-                  {statusCounts['In Use'] || 0} In Use
-                </Badge>
-                <Badge variant="destructive" className="bg-ev-out-of-service text-white">
-                  {statusCounts['Out of Service'] || 0} Out of Service
-                </Badge>
-                <Badge variant="outline" className="bg-ev-unknown text-white border-ev-unknown">
-                  {statusCounts['Unknown'] || 0} Unknown
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {availableChargers.length} of {totalChargers} chargers available
-              </p>
-            </CardContent>
-          </Card>
+        <Separator className="my-4" />
 
-          {/* Chargers List */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Available Chargers</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {station.chargers.map((charger) => (
-                  <div
-                    key={charger.charger_id}
-                    className={cn(
-                      "flex items-center justify-between p-3 rounded-lg border",
-                      charger.current_status === 'Available' 
-                        ? "border-ev-available/20 bg-ev-available/5"
-                        : charger.current_status === 'In Use'
-                        ? "border-ev-in-use/20 bg-ev-in-use/5"
-                        : charger.current_status === 'Out of Service'
-                        ? "border-ev-out-of-service/20 bg-ev-out-of-service/5"
-                        : "border-ev-unknown/20 bg-ev-unknown/5"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(charger.current_status)}
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{charger.plug_type}</span>
-                          <Badge variant="outline">
-                            <Zap className="h-3 w-3 mr-1" />
-                            {charger.max_power_kw}kW
-                          </Badge>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {formatLastUpdate(charger.last_update_timestamp)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <Badge variant={getStatusBadgeVariant(charger.current_status)}>
-                      {charger.current_status}
-                    </Badge>
-                  </div>
-                ))}
+        <div className="space-y-4">
+          {station.chargers.map((charger) => (
+            <div key={charger.charger_id} className="flex items-center justify-between p-3 rounded-lg border">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium">
+                    Charger {charger.charger_id}: {charger.plug_type} ({charger.max_power_kw} kW)
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="h-3 w-3" />
+                  Updated {formatTimeAgo(charger.last_update_timestamp)}
+                </div>
               </div>
-            </CardContent>
-          </Card>
+              <Badge variant={getStatusBadgeVariant(charger.current_status)}>
+                {charger.current_status}
+              </Badge>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3 pt-6 mt-auto">
+          <Button 
+            onClick={handleGetDirections}
+            className="flex-1 flex items-center gap-2"
+          >
+            <Navigation className="h-4 w-4" />
+            Get Directions
+          </Button>
+          <Button 
+            variant="secondary"
+            onClick={handleUpdateStatus}
+            className="flex-1 flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Update Status
+          </Button>
         </div>
       </SheetContent>
     </Sheet>
