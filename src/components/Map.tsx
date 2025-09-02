@@ -32,7 +32,24 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, onStationClick }
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [showTokenInput, setShowTokenInput] = useState(true);
+  const [showTokenInput, setShowTokenInput] = useState(false);
+  
+  // Check for stored token on mount
+  useEffect(() => {
+    const storedToken = localStorage.getItem('mapbox-token');
+    if (storedToken) {
+      setMapboxToken(storedToken);
+      setShowTokenInput(false);
+      // Initialize map after a delay to ensure component is mounted
+      setTimeout(() => {
+        if (!map.current) {
+          initializeMap(storedToken);
+        }
+      }, 100);
+    } else {
+      setShowTokenInput(true);
+    }
+  }, []);
 
   const getStationPinStyle = (station: Station) => {
     const relevantChargers = station.chargers.filter(charger =>
@@ -257,8 +274,9 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, onStationClick }
 
   const handleTokenSubmit = () => {
     if (mapboxToken.trim()) {
+      localStorage.setItem('mapbox-token', mapboxToken.trim());
       setShowTokenInput(false);
-      initializeMap(mapboxToken);
+      initializeMap(mapboxToken.trim());
     }
   };
 

@@ -2,8 +2,10 @@ import { useState } from 'react';
 import Map from '@/components/Map';
 import FilterChips from '@/components/FilterChips';
 import StationDetailsModal from '@/components/StationDetailsModal';
+import StationsList from '@/components/StationsList';
 import { useStations } from '@/hooks/useStations';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Zap } from 'lucide-react';
 
 interface Station {
@@ -59,10 +61,10 @@ const Index = () => {
   }
 
   return (
-    <div className="relative h-screen w-full bg-background overflow-hidden">
+    <div className="min-h-screen bg-background">
       {/* Minimalist Header */}
-      <div className="absolute top-0 left-0 right-0 z-30 bg-background/80 backdrop-blur-lg border-b border-border/30">
-        <div className="flex items-center justify-center py-4 px-6">
+      <div className="bg-background/80 backdrop-blur-lg border-b border-border/30">
+        <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
               <Zap className="h-5 w-5 text-white" />
@@ -75,20 +77,39 @@ const Index = () => {
         </div>
       </div>
 
-      {/* Intelligent Filter Chips */}
-      <FilterChips
-        availablePlugTypes={availablePlugTypes}
-        selectedPlugTypes={selectedPlugTypes}
-        onSelectionChange={setSelectedPlugTypes}
-      />
-
-      {/* Predictive Smart Map */}
-      <div className="absolute inset-0 pt-20">
-        <Map
-          stations={stations}
+      {/* Filter Section */}
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <FilterChips
+          availablePlugTypes={availablePlugTypes}
           selectedPlugTypes={selectedPlugTypes}
-          onStationClick={handleStationClick}
+          onSelectionChange={setSelectedPlugTypes}
         />
+      </div>
+
+      {/* Main Content with Tabs */}
+      <div className="max-w-7xl mx-auto px-4 pb-4">
+        <Tabs defaultValue="map" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="map">Map View</TabsTrigger>
+            <TabsTrigger value="list">List View</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="map" className="h-[70vh] rounded-lg overflow-hidden border border-border">
+            <Map
+              stations={stations}
+              selectedPlugTypes={selectedPlugTypes}
+              onStationClick={handleStationClick}
+            />
+          </TabsContent>
+          
+          <TabsContent value="list" className="max-h-[70vh] overflow-y-auto">
+            <StationsList
+              stations={stations}
+              selectedPlugTypes={selectedPlugTypes}
+              onStationClick={handleStationClick}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Contextual Station Hub */}
