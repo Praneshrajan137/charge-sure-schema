@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      charger_status_updates: {
+        Row: {
+          charger_id: string
+          created_at: string
+          id: string
+          new_status: string
+          notes: string | null
+          old_status: string
+          reported_at: string
+          reported_by: string | null
+        }
+        Insert: {
+          charger_id: string
+          created_at?: string
+          id?: string
+          new_status: string
+          notes?: string | null
+          old_status: string
+          reported_at?: string
+          reported_by?: string | null
+        }
+        Update: {
+          charger_id?: string
+          created_at?: string
+          id?: string
+          new_status?: string
+          notes?: string | null
+          old_status?: string
+          reported_at?: string
+          reported_by?: string | null
+        }
+        Relationships: []
+      }
       chargers: {
         Row: {
           charger_id: string
@@ -90,7 +123,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_charger_status: {
+        Args: {
+          p_charger_id: string
+          p_new_status: string
+          p_notes?: string
+          p_reported_by?: string
+        }
+        Returns: {
+          message: string
+          success: boolean
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
