@@ -3,7 +3,9 @@ import Map from '@/components/Map';
 import FilterChips from '@/components/FilterChips';
 import StationDetailsModal from '@/components/StationDetailsModal';
 import StationsList from '@/components/StationsList';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import { useStations } from '@/hooks/useStations';
+import { useLocation } from '@/hooks/useLocation';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, Zap } from 'lucide-react';
@@ -24,8 +26,10 @@ interface Station {
 }
 
 const Index = () => {
-  const { stations, loading } = useStations();
+  const { stations, loading, refetch } = useStations();
+  const { location } = useLocation();
   const [selectedPlugTypes, setSelectedPlugTypes] = useState<string[]>([]);
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -46,6 +50,10 @@ const Index = () => {
     setSelectedStation(null);
   };
 
+  const handleStatusUpdate = () => {
+    refetch(); // Refresh stations data after status update
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -62,6 +70,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Offline Indicator */}
+      <OfflineIndicator />
+      
       {/* Minimalist Header */}
       <div className="bg-background/80 backdrop-blur-lg border-b border-border/30">
         <div className="max-w-7xl mx-auto px-4 py-4">
@@ -70,7 +81,7 @@ const Index = () => {
               <Zap className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">ChargeSure</h1>
+              <h1 className="text-xl font-bold text-foreground outdoor-visibility">ChargeSure</h1>
               <p className="text-xs text-muted-foreground">Charge with Certainty</p>
             </div>
           </div>
@@ -84,6 +95,8 @@ const Index = () => {
             availablePlugTypes={availablePlugTypes}
             selectedPlugTypes={selectedPlugTypes}
             onSelectionChange={setSelectedPlugTypes}
+            showAvailableOnly={showAvailableOnly}
+            onAvailableOnlyChange={setShowAvailableOnly}
           />
         </div>
       )}
@@ -91,23 +104,27 @@ const Index = () => {
       {/* Main Content with Tabs */}
       <div className="max-w-7xl mx-auto px-4 pb-4">
         <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="map">Map View</TabsTrigger>
-            <TabsTrigger value="list">List View</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-4 touch-target">
+            <TabsTrigger value="map" className="touch-target">Map View</TabsTrigger>
+            <TabsTrigger value="list" className="touch-target">List View</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="map" className="h-[70vh] rounded-lg overflow-hidden border border-border">
+          <TabsContent value="map" className="h-[70vh] rounded-lg overflow-hidden border border-border mobile-scroll">
             <Map
               stations={stations}
               selectedPlugTypes={selectedPlugTypes}
+              showAvailableOnly={showAvailableOnly}
+              userLocation={location}
               onStationClick={handleStationClick}
             />
           </TabsContent>
           
-          <TabsContent value="list" className="max-h-[70vh] overflow-y-auto">
+          <TabsContent value="list" className="max-h-[70vh] overflow-y-auto mobile-scroll">
             <StationsList
               stations={stations}
               selectedPlugTypes={selectedPlugTypes}
+              showAvailableOnly={showAvailableOnly}
+              userLocation={location}
               onStationClick={handleStationClick}
             />
           </TabsContent>
@@ -119,6 +136,7 @@ const Index = () => {
         station={selectedStation}
         isOpen={isModalOpen}
         onClose={handleModalClose}
+        onStatusUpdate={handleStatusUpdate}
       />
     </div>
   );

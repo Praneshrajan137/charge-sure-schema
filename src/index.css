@@ -103,7 +103,122 @@ All colors MUST be HSL.
     --ev-in-use: 217 91% 70%;       /* Brighter blue for dark mode */
     --ev-out-of-service: 0 84% 70%; /* Brighter red for dark mode */
     --ev-unknown: 220 9% 56%;       /* Lighter gray for dark mode */
+  /* Mobile-first improvements */
+  --touch-target-min: 44px; /* Minimum touch target size */
+  --mobile-padding: 1rem;
+  --outdoor-contrast-text: hsl(var(--foreground));
+  --outdoor-contrast-bg: hsl(var(--background));
+  
+  /* Offline mode indicator */
+  --offline-color: 220 17% 32%;
+  --offline-bg: 220 13% 91%;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Larger touch targets */
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
   }
+  
+  /* Better scroll behavior */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Improved contrast for outdoor visibility */
+  .outdoor-visibility {
+    text-shadow: 0 0 4px hsl(var(--background));
+    font-weight: 500;
+  }
+}
+
+/* Offline mode indicator */
+.offline-indicator {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  background: hsl(var(--offline-bg));
+  color: hsl(var(--offline-color));
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Enhanced hover effects for better mobile feedback */
+.hover-lift {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover,
+.hover-lift:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile-friendly animations */
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift {
+    transform: none !important;
+  }
+  
+  .animate-fade-in,
+  .animate-slide-in-right {
+    animation: none !important;
+  }
+}
+
+/* Better focus indicators for accessibility */
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Improve contrast for status indicators */
+.text-ev-available {
+  color: hsl(142 76% 36%);
+  font-weight: 600;
+}
+
+.text-ev-in-use {
+  color: hsl(32 95% 44%);
+  font-weight: 600;
+}
+
+.text-ev-out-of-service {
+  color: hsl(0 84% 60%);
+  font-weight: 600;
+}
+
+.bg-ev-available {
+  background-color: hsl(142 76% 36%);
+}
+
+.bg-ev-in-use {
+  background-color: hsl(32 95% 44%);
+}
+
+.bg-ev-out-of-service {
+  background-color: hsl(0 84% 60%);
 }
 
 @layer base {

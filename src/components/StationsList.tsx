@@ -2,7 +2,8 @@ import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Zap, Clock, AlertTriangle } from 'lucide-react';
+import { MapPin, Zap, Clock, AlertTriangle, Navigation } from 'lucide-react';
+import { Coordinates, calculateDistance, formatDistance } from '@/utils/distance';
 
 interface Station {
   station_id: string;
@@ -22,21 +23,45 @@ interface Station {
 interface StationsListProps {
   stations: Station[];
   selectedPlugTypes: string[];
+  showAvailableOnly: boolean;
+  userLocation: Coordinates | null;
   onStationClick: (station: Station) => void;
 }
 
 const StationsList: React.FC<StationsListProps> = ({ 
   stations, 
   selectedPlugTypes, 
+  showAvailableOnly,
+  userLocation,
   onStationClick 
 }) => {
-  // Filter stations based on plug type selection
+  // Filter stations based on plug type and availability selection
   const filteredStations = stations.filter(station => {
-    if (selectedPlugTypes.length === 0) return true;
-    return station.chargers.some(charger => 
-      selectedPlugTypes.includes(charger.plug_type)
-    );
+    // Filter by plug type
+    const hasMatchingPlugType = selectedPlugTypes.length === 0 || 
+      station.chargers.some(charger => selectedPlugTypes.includes(charger.plug_type));
+    
+    if (!hasMatchingPlugType) return false;
+    
+    // Filter by availability if enabled
+    if (showAvailableOnly) {
+      const relevantChargers = station.chargers.filter(charger =>
+        selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type)
+      );
+      return relevantChargers.some(charger => charger.current_status === 'Available');
+    }
+    
+    return true;
   });
+
+  // Sort by distance if user location is available
+  const sortedStations = userLocation 
+    ? filteredStations.sort((a, b) => {
+        const distanceA = calculateDistance(userLocation, { latitude: a.latitude, longitude: a.longitude });
+        const distanceB = calculateDistance(userLocation, { latitude: b.latitude, longitude: b.longitude });
+        return distanceA - distanceB;
+      })
+    : filteredStations;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -62,13 +87,13 @@ const StationsList: React.FC<StationsListProps> = ({
     return { text: `${available}/${total} Available`, variant: 'outline' as const };
   };
 
-  if (filteredStations.length === 0) {
+  if (sortedStations.length === 0) {
     return (
       <div className="text-center py-8">
         <MapPin className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">No stations found</h3>
         <p className="text-muted-foreground">
-          {selectedPlugTypes.length > 0 
+          {selectedPlugTypes.length > 0 || showAvailableOnly
             ? 'Try adjusting your filter selection'
             : 'Stations will appear here once loaded'
           }
@@ -80,12 +105,20 @@ const StationsList: React.FC<StationsListProps> = ({
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-foreground mb-4">
-        Charging Stations ({filteredStations.length})
+        Charging Stations ({sortedStations.length})
+        {userLocation && (
+          <span className="text-sm font-normal text-muted-foreground ml-2">
+            • Sorted by distance
+          </span>
+        )}
       </h2>
       
-      {filteredStations.map((station) => {
+      {sortedStations.map((station) => {
         const status = getAvailabilityStatus(station);
         const maxPower = Math.max(...station.chargers.map(c => c.max_power_kw));
+        const distance = userLocation 
+          ? calculateDistance(userLocation, { latitude: station.latitude, longitude: station.longitude })
+          : null;
         
         return (
           <Card 
@@ -100,6 +133,12 @@ const StationsList: React.FC<StationsListProps> = ({
                   <Badge variant={status.variant} className="text-xs">
                     {status.text}
                   </Badge>
+                  {distance && (
+                    <Badge variant="outline" className="text-xs flex items-center gap-1">
+                      <Navigation className="h-3 w-3" />
+                      {formatDistance(distance)}
+                    </Badge>
+                  )}
                 </div>
                 
                 <p className="text-sm text-muted-foreground mb-3 line-clamp-1">

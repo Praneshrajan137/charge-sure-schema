@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MapPin, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { Coordinates, calculateDistance } from '@/utils/distance';
 
 interface Station {
   station_id: string;
@@ -24,10 +25,12 @@ interface Station {
 interface MapProps {
   stations: Station[];
   selectedPlugTypes: string[];
+  showAvailableOnly: boolean;
+  userLocation: Coordinates | null;
   onStationClick: (station: Station) => void;
 }
 
-const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, onStationClick }) => {
+const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnly, userLocation, onStationClick }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -244,12 +247,23 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, onStationClick }
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Filter stations based on plug type selection
+    // Filter stations based on plug type and availability selection
     const filteredStations = stations.filter(station => {
-      if (selectedPlugTypes.length === 0) return true;
-      return station.chargers.some(charger => 
-        selectedPlugTypes.includes(charger.plug_type)
-      );
+      // Filter by plug type
+      const hasMatchingPlugType = selectedPlugTypes.length === 0 || 
+        station.chargers.some(charger => selectedPlugTypes.includes(charger.plug_type));
+      
+      if (!hasMatchingPlugType) return false;
+      
+      // Filter by availability if enabled
+      if (showAvailableOnly) {
+        const relevantChargers = station.chargers.filter(charger =>
+          selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type)
+        );
+        return relevantChargers.some(charger => charger.current_status === 'Available');
+      }
+      
+      return true;
     });
 
     // Add new markers with enhanced styling
@@ -270,7 +284,7 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, onStationClick }
 
   useEffect(() => {
     updateMarkers();
-  }, [stations, selectedPlugTypes]);
+  }, [stations, selectedPlugTypes, showAvailableOnly]);
 
   const handleTokenSubmit = () => {
     if (mapboxToken.trim()) {

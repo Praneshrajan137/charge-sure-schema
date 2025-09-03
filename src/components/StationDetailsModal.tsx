@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
@@ -22,11 +21,12 @@ import {
   Loader, 
   Navigation, 
   RefreshCw,
-  Star,
   TrendingUp,
   Users,
-  Award
+  Award,
+  Settings
 } from 'lucide-react';
+import StatusUpdateModal from './StatusUpdateModal';
 
 interface Charger {
   charger_id: string;
@@ -49,6 +49,7 @@ interface StationDetailsModalProps {
   station: Station | null;
   isOpen: boolean;
   onClose: () => void;
+  onStatusUpdate: () => void;
 }
 
 const getStatusIcon = (status: string) => {
@@ -96,9 +97,22 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   station,
   isOpen,
   onClose,
+  onStatusUpdate,
 }) => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('status');
+  const [statusUpdateModal, setStatusUpdateModal] = useState<{
+    isOpen: boolean;
+    charger: Charger | null;
+  }>({ isOpen: false, charger: null });
+
+  const handleStatusUpdateClick = (charger: Charger) => {
+    setStatusUpdateModal({ isOpen: true, charger });
+  };
+
+  const handleStatusUpdateClose = () => {
+    setStatusUpdateModal({ isOpen: false, charger: null });
+  };
   
   if (!station) return null;
 
@@ -126,141 +140,169 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   const maxPower = Math.max(...station.chargers.map(c => c.max_power_kw));
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl animate-slide-in-right">
-        {/* Dynamic Header Banner */}
-        {isGoldenStation && (
-          <div className="absolute top-0 left-0 right-0 bg-gradient-golden text-white text-center py-2 rounded-t-3xl">
-            <div className="flex items-center justify-center gap-2">
-              <Award className="h-4 w-4" />
-              <span className="text-sm font-medium">Community Trusted Station</span>
+    <>
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl animate-slide-in-right">
+          {/* Dynamic Header Banner */}
+          {isGoldenStation && (
+            <div className="absolute top-0 left-0 right-0 bg-gradient-golden text-white text-center py-2 rounded-t-3xl">
+              <div className="flex items-center justify-center gap-2">
+                <Award className="h-4 w-4" />
+                <span className="text-sm font-medium">Community Trusted Station</span>
+              </div>
             </div>
-          </div>
-        )}
-        
-        <SheetHeader className={cn("pb-4", isGoldenStation && "pt-10")}>
-          <SheetTitle className="text-2xl font-bold">
-            {station.name}
-          </SheetTitle>
-          <SheetDescription className="text-muted-foreground flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            {station.address}
-          </SheetDescription>
+          )}
           
-          {/* Predictive Wait-Time Bar */}
-          <div className="mt-4 p-3 bg-muted/50 rounded-xl">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Availability Prediction</span>
-              <TrendingUp className="h-4 w-4 text-primary" />
+          <SheetHeader className={cn("pb-4", isGoldenStation && "pt-10")}>
+            <SheetTitle className="text-2xl font-bold">
+              {station.name}
+            </SheetTitle>
+            <SheetDescription className="text-muted-foreground flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              {station.address}
+            </SheetDescription>
+            
+            {/* Predictive Wait-Time Bar */}
+            <div className="mt-4 p-3 bg-muted/50 rounded-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Availability Prediction</span>
+                <TrendingUp className="h-4 w-4 text-primary" />
+              </div>
+              {likelyAvailable ? (
+                <div className="text-sm text-ev-available font-medium">
+                  ✓ Likely available upon arrival
+                </div>
+              ) : (
+                <div className="text-sm text-ev-waiting font-medium">
+                  ⏳ {estimatedWait} min estimated wait
+                </div>
+              )}
+              <Progress value={likelyAvailable ? 85 : 25} className="mt-2" />
             </div>
-            {likelyAvailable ? (
-              <div className="text-sm text-ev-available font-medium">
-                ✓ Likely available upon arrival
-              </div>
-            ) : (
-              <div className="text-sm text-ev-waiting font-medium">
-                ⏳ {estimatedWait} min estimated wait
-              </div>
-            )}
-            <Progress value={likelyAvailable ? 85 : 25} className="mt-2" />
-          </div>
-        </SheetHeader>
+          </SheetHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="status" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Live Status
-            </TabsTrigger>
-            <TabsTrigger value="community" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Community
-            </TabsTrigger>
-          </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="status" className="flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Live Status
+              </TabsTrigger>
+              <TabsTrigger value="community" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Community
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="status" className="mt-4 space-y-4">
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-3 bg-muted/50 rounded-xl">
-                <div className="text-2xl font-bold text-ev-available">{availableCount}</div>
-                <div className="text-xs text-muted-foreground">Available</div>
+            <TabsContent value="status" className="mt-4 space-y-4">
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 bg-muted/50 rounded-xl">
+                  <div className="text-2xl font-bold text-ev-available">{availableCount}</div>
+                  <div className="text-xs text-muted-foreground">Available</div>
+                </div>
+                <div className="text-center p-3 bg-muted/50 rounded-xl">
+                  <div className="text-2xl font-bold">{maxPower}</div>
+                  <div className="text-xs text-muted-foreground">Max kW</div>
+                </div>
+                <div className="text-center p-3 bg-muted/50 rounded-xl">
+                  <div className="text-2xl font-bold">{totalCount}</div>
+                  <div className="text-xs text-muted-foreground">Total</div>
+                </div>
               </div>
-              <div className="text-center p-3 bg-muted/50 rounded-xl">
-                <div className="text-2xl font-bold">{maxPower}</div>
-                <div className="text-xs text-muted-foreground">Max kW</div>
-              </div>
-              <div className="text-center p-3 bg-muted/50 rounded-xl">
-                <div className="text-2xl font-bold">{totalCount}</div>
-                <div className="text-xs text-muted-foreground">Total</div>
-              </div>
-            </div>
 
-            {/* Chargers List */}
-            <div className="space-y-3">
-              {station.chargers.map((charger) => (
-                <div
-                  key={charger.charger_id}
-                  className="flex items-center justify-between p-4 rounded-xl border hover-lift transition-all duration-300"
-                >
-                  <div className="flex items-center gap-3">
-                    {getStatusIcon(charger.current_status)}
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{charger.plug_type}</span>
-                        <Badge variant="outline" className="text-xs">
-                          <Zap className="h-3 w-3 mr-1" />
-                          {charger.max_power_kw}kW
-                        </Badge>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {formatTimeAgo(charger.last_update_timestamp)}
+              {/* Chargers List */}
+              <div className="space-y-3">
+                {station.chargers.map((charger) => (
+                  <div
+                    key={charger.charger_id}
+                    className="group flex items-center justify-between p-4 rounded-xl border hover-lift transition-all duration-300"
+                  >
+                    <div className="flex items-center gap-3">
+                      {getStatusIcon(charger.current_status)}
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{charger.plug_type}</span>
+                          <Badge variant="outline" className="text-xs">
+                            <Zap className="h-3 w-3 mr-1" />
+                            {charger.max_power_kw}kW
+                          </Badge>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          {formatTimeAgo(charger.last_update_timestamp)}
+                        </div>
                       </div>
                     </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getStatusBadgeVariant(charger.current_status)}>
+                        {charger.current_status}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStatusUpdateClick(charger);
+                        }}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Settings className="h-3 w-3 mr-1" />
+                        Update
+                      </Button>
+                    </div>
                   </div>
-                  
-                  <Badge variant={getStatusBadgeVariant(charger.current_status)}>
-                    {charger.current_status}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
+                ))}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="community" className="mt-4 space-y-4">
-            <div className="text-center py-8">
-              <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Community Feed</h3>
-              <p className="text-muted-foreground text-sm">
-                See what other drivers are saying about this station
-              </p>
-              <Button variant="outline" className="mt-4">
-                Coming Soon
-              </Button>
-            </div>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="community" className="mt-4 space-y-4">
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Community Feed</h3>
+                <p className="text-muted-foreground text-sm">
+                  See what other drivers are saying about this station
+                </p>
+                <Button variant="outline" className="mt-4">
+                  Coming Soon
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 mt-auto border-t">
-          <Button 
-            onClick={handleGetDirections}
-            className="flex-1 flex items-center gap-2 bg-gradient-primary hover:opacity-90"
-          >
-            <Navigation className="h-4 w-4" />
-            Get Directions
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={handleUpdateStatus}
-            className="flex-1 flex items-center gap-2 hover:bg-muted"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Update Status
-          </Button>
-        </div>
-      </SheetContent>
-    </Sheet>
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4 mt-auto border-t">
+            <Button 
+              onClick={handleGetDirections}
+              className="flex-1 flex items-center gap-2 bg-gradient-primary hover:opacity-90"
+            >
+              <Navigation className="h-4 w-4" />
+              Get Directions
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleUpdateStatus}
+              className="flex-1 flex items-center gap-2 hover:bg-muted"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Update Status
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Status Update Modal */}
+      <StatusUpdateModal
+        station={station}
+        charger={statusUpdateModal.charger}
+        isOpen={statusUpdateModal.isOpen}
+        onClose={handleStatusUpdateClose}
+        onStatusUpdate={() => {
+          onStatusUpdate();
+          handleStatusUpdateClose();
+        }}
+      />
+    </>
   );
 };
 

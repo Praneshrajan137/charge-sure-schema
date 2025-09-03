@@ -6,6 +6,8 @@ interface FilterChipsProps {
   availablePlugTypes: string[];
   selectedPlugTypes: string[];
   onSelectionChange: (selected: string[]) => void;
+  showAvailableOnly: boolean;
+  onAvailableOnlyChange: (show: boolean) => void;
 }
 
 const plugTypeDisplayNames: Record<string, string> = {
@@ -18,7 +20,9 @@ const plugTypeDisplayNames: Record<string, string> = {
 const FilterChips: React.FC<FilterChipsProps> = ({ 
   availablePlugTypes, 
   selectedPlugTypes, 
-  onSelectionChange 
+  onSelectionChange,
+  showAvailableOnly,
+  onAvailableOnlyChange
 }) => {
   const togglePlugType = (plugType: string) => {
     if (selectedPlugTypes.includes(plugType)) {
@@ -41,6 +45,21 @@ const FilterChips: React.FC<FilterChipsProps> = ({
           </span>
           
           <div className="flex flex-wrap gap-2 justify-center w-full">
+            {/* Available Now Filter */}
+            <Badge
+              variant={showAvailableOnly ? "default" : "secondary"}
+              className={cn(
+                "cursor-pointer transition-all duration-300 hover-lift",
+                showAvailableOnly 
+                  ? "bg-ev-available text-white shadow-glow" 
+                  : "hover:bg-secondary/80 hover:shadow-md"
+              )}
+              onClick={() => onAvailableOnlyChange(!showAvailableOnly)}
+            >
+              🟢 Available Now
+            </Badge>
+            
+            {/* Plug Type Filters */}
             {availablePlugTypes.map((plugType) => {
               const isSelected = selectedPlugTypes.includes(plugType);
               return (
@@ -61,22 +80,33 @@ const FilterChips: React.FC<FilterChipsProps> = ({
             })}
           </div>
           
-          {selectedPlugTypes.length > 0 && (
+          {(selectedPlugTypes.length > 0 || showAvailableOnly) && (
             <div className="w-full flex justify-center mt-2">
               <Badge
                 variant="outline"
                 className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-all duration-300"
-                onClick={clearAll}
+                onClick={() => {
+                  clearAll();
+                  onAvailableOnlyChange(false);
+                }}
               >
-                Clear All
+                Clear All Filters
               </Badge>
             </div>
           )}
         </div>
         
-        {selectedPlugTypes.length > 0 && (
+        {(selectedPlugTypes.length > 0 || showAvailableOnly) && (
           <div className="mt-3 text-xs text-muted-foreground text-center">
-            Showing {selectedPlugTypes.length} of {availablePlugTypes.length} plug types
+            {showAvailableOnly && selectedPlugTypes.length > 0 && 
+              `Showing available ${selectedPlugTypes.length} of ${availablePlugTypes.length} plug types`
+            }
+            {showAvailableOnly && selectedPlugTypes.length === 0 && 
+              'Showing only available chargers'
+            }
+            {!showAvailableOnly && selectedPlugTypes.length > 0 && 
+              `Showing ${selectedPlugTypes.length} of ${availablePlugTypes.length} plug types`
+            }
           </div>
         )}
       </div>
