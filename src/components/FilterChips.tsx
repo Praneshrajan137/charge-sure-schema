@@ -33,8 +33,8 @@ const FilterChips: React.FC<FilterChipsProps> = ({
   };
 
   return (
-    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-20 animate-fade-in">
-      <div className="bg-background/95 backdrop-blur-md rounded-2xl border border-border/50 shadow-xl p-4 max-w-sm">
+    <div className="w-full animate-fade-in">
+      <div className="bg-background/95 backdrop-blur-md rounded-xl border border-border/50 shadow-lg p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-foreground mb-2 w-full text-center">
             Filter by Plug Type

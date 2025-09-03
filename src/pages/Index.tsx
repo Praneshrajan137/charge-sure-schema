@@ -78,13 +78,15 @@ const Index = () => {
       </div>
 
       {/* Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <FilterChips
-          availablePlugTypes={availablePlugTypes}
-          selectedPlugTypes={selectedPlugTypes}
-          onSelectionChange={setSelectedPlugTypes}
-        />
-      </div>
+      {availablePlugTypes.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 pt-4 pb-4">
+          <FilterChips
+            availablePlugTypes={availablePlugTypes}
+            selectedPlugTypes={selectedPlugTypes}
+            onSelectionChange={setSelectedPlugTypes}
+          />
+        </div>
+      )}
 
       {/* Main Content with Tabs */}
       <div className="max-w-7xl mx-auto px-4 pb-4">
