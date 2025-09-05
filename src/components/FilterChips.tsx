@@ -1,117 +1,85 @@
-import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Zap, CheckCircle, Clock, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface FilterChipsProps {
-  availablePlugTypes: string[];
-  selectedPlugTypes: string[];
-  onSelectionChange: (selected: string[]) => void;
-  showAvailableOnly: boolean;
-  onAvailableOnlyChange: (show: boolean) => void;
+  activeFilter: string | null;
+  onFilterChange: (filter: string | null) => void;
+  locationEnabled?: boolean;
+  hasRecentStations?: boolean;
 }
 
-const plugTypeDisplayNames: Record<string, string> = {
-  'CCS': 'CCS',
-  'CHAdeMO': 'CHAdeMO',
-  'Type 2': 'Type 2',
-  'J-1772': 'J1772',
-};
+export const FilterChips = ({ 
+  activeFilter, 
+  onFilterChange, 
+  locationEnabled,
+  hasRecentStations 
+}: FilterChipsProps) => {
+  const filters = [
+    {
+      id: "available",
+      label: "Available Now",
+      icon: CheckCircle,
+      description: "Show only stations with available chargers"
+    },
+    {
+      id: "fast",
+      label: "Fast Charging",
+      icon: Zap,
+      description: "50kW+ charging stations"
+    },
+    ...(locationEnabled ? [{
+      id: "nearby",
+      label: "Nearby",
+      icon: MapPin,
+      description: "Closest stations first"
+    }] : []),
+    ...(hasRecentStations ? [{
+      id: "recent",
+      label: "Recent",
+      icon: Clock,
+      description: "Previously visited stations"
+    }] : [])
+  ];
 
-const FilterChips: React.FC<FilterChipsProps> = ({ 
-  availablePlugTypes, 
-  selectedPlugTypes, 
-  onSelectionChange,
-  showAvailableOnly,
-  onAvailableOnlyChange
-}) => {
-  const togglePlugType = (plugType: string) => {
-    if (selectedPlugTypes.includes(plugType)) {
-      onSelectionChange(selectedPlugTypes.filter(type => type !== plugType));
+  const handleFilterClick = (filterId: string) => {
+    if (activeFilter === filterId) {
+      onFilterChange(null);
     } else {
-      onSelectionChange([...selectedPlugTypes, plugType]);
+      onFilterChange(filterId);
     }
   };
 
-  const clearAll = () => {
-    onSelectionChange([]);
-  };
-
   return (
-    <div className="w-full animate-fade-in">
-      <div className="bg-background/95 backdrop-blur-md rounded-xl border border-border/50 shadow-lg p-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-foreground mb-2 w-full text-center">
-            Filter by Plug Type
-          </span>
-          
-          <div className="flex flex-wrap gap-2 justify-center w-full">
-            {/* Available Now Filter */}
-            <Badge
-              variant={showAvailableOnly ? "default" : "secondary"}
-              className={cn(
-                "cursor-pointer transition-all duration-300 hover-lift",
-                showAvailableOnly 
-                  ? "bg-ev-available text-white shadow-glow" 
-                  : "hover:bg-secondary/80 hover:shadow-md"
-              )}
-              onClick={() => onAvailableOnlyChange(!showAvailableOnly)}
-            >
-              🟢 Available Now
-            </Badge>
-            
-            {/* Plug Type Filters */}
-            {availablePlugTypes.map((plugType) => {
-              const isSelected = selectedPlugTypes.includes(plugType);
-              return (
-                <Badge
-                  key={plugType}
-                  variant={isSelected ? "default" : "secondary"}
-                  className={cn(
-                    "cursor-pointer transition-all duration-300 hover-lift",
-                    isSelected 
-                      ? "bg-primary text-primary-foreground shadow-glow" 
-                      : "hover:bg-secondary/80 hover:shadow-md"
-                  )}
-                  onClick={() => togglePlugType(plugType)}
-                >
-                  {plugTypeDisplayNames[plugType] || plugType}
-                </Badge>
-              );
-            })}
-          </div>
-          
-          {(selectedPlugTypes.length > 0 || showAvailableOnly) && (
-            <div className="w-full flex justify-center mt-2">
-              <Badge
-                variant="outline"
-                className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground transition-all duration-300"
-                onClick={() => {
-                  clearAll();
-                  onAvailableOnlyChange(false);
-                }}
-              >
-                Clear All Filters
-              </Badge>
-            </div>
-          )}
-        </div>
+    <div className="flex flex-wrap gap-2 justify-center items-center">
+      {filters.map((filter) => {
+        const Icon = filter.icon;
+        const isActive = activeFilter === filter.id;
         
-        {(selectedPlugTypes.length > 0 || showAvailableOnly) && (
-          <div className="mt-3 text-xs text-muted-foreground text-center">
-            {showAvailableOnly && selectedPlugTypes.length > 0 && 
-              `Showing available ${selectedPlugTypes.length} of ${availablePlugTypes.length} plug types`
-            }
-            {showAvailableOnly && selectedPlugTypes.length === 0 && 
-              'Showing only available chargers'
-            }
-            {!showAvailableOnly && selectedPlugTypes.length > 0 && 
-              `Showing ${selectedPlugTypes.length} of ${availablePlugTypes.length} plug types`
-            }
-          </div>
-        )}
-      </div>
+        return (
+          <Badge
+            key={filter.id}
+            variant={isActive ? "default" : "outline"}
+            className="cursor-pointer hover:bg-primary/10 transition-colors px-3 py-2 text-sm touch-target"
+            onClick={() => handleFilterClick(filter.id)}
+          >
+            <Icon className="w-4 h-4 mr-1.5" />
+            {filter.label}
+          </Badge>
+        );
+      })}
+      
+      {activeFilter && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onFilterChange(null)}
+          className="h-8 px-2 text-muted-foreground hover:text-foreground"
+        >
+          <X className="h-4 w-4 mr-1" />
+          Clear
+        </Button>
+      )}
     </div>
   );
 };
-
-export default FilterChips;

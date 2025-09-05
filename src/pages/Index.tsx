@@ -1,145 +1,124 @@
-import { useState } from 'react';
-import Map from '@/components/Map';
-import FilterChips from '@/components/FilterChips';
-import StationDetailsModal from '@/components/StationDetailsModal';
-import StationsList from '@/components/StationsList';
-import OfflineIndicator from '@/components/OfflineIndicator';
-import { useStations } from '@/hooks/useStations';
-import { useLocation } from '@/hooks/useLocation';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Zap } from 'lucide-react';
+import { useState, useMemo } from "react";
+import Map from "@/components/Map";
+import StationsList from "@/components/StationsList";
+import { FilterChips } from "@/components/FilterChips";
+import OfflineIndicator from "@/components/OfflineIndicator";
+import { SearchBar } from "@/components/SearchBar";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useStations } from "@/hooks/useStations";
+import { useLocation } from "@/hooks/useLocation";
+import { useRecentStations } from "@/hooks/useRecentStations";
+import { calculateDistance } from "@/utils/distance";
 
-interface Station {
-  station_id: string;
-  name: string;
-  address: string;
-  latitude: number;
-  longitude: number;
-  chargers: Array<{
-    charger_id: string;
-    plug_type: string;
-    max_power_kw: number;
-    current_status: string;
-    last_update_timestamp: string;
-  }>;
-}
+export default function Index() {
+  const { data: stations = [], isLoading, error } = useStations();
+  const { location, loading: locationLoading, error: locationError } = useLocation();
+  const { recentStations } = useRecentStations();
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-const Index = () => {
-  const { stations, loading, refetch } = useStations();
-  const { location } = useLocation();
-  const [selectedPlugTypes, setSelectedPlugTypes] = useState<string[]>([]);
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
-  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // Filter and search stations
+  const filteredStations = useMemo(() => {
+    let filtered = stations;
 
-  // Get all available plug types from stations
-  const availablePlugTypes = Array.from(
-    new Set(stations.flatMap(station => 
-      station.chargers.map(charger => charger.plug_type)
-    ))
-  ).sort();
+    // Apply text search
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(station => 
+        station.name.toLowerCase().includes(query) ||
+        station.address.toLowerCase().includes(query) ||
+        station.chargers.some(charger => 
+          charger.plug_type.toLowerCase().includes(query)
+        )
+      );
+    }
 
-  const handleStationClick = (station: Station) => {
-    setSelectedStation(station);
-    setIsModalOpen(true);
-  };
+    // Apply filters
+    if (activeFilter === "available") {
+      filtered = filtered.filter(station => 
+        station.chargers.some(charger => charger.current_status === "Available")
+      );
+    } else if (activeFilter === "fast") {
+      filtered = filtered.filter(station => 
+        station.chargers.some(charger => charger.max_power_kw >= 50)
+      );
+    } else if (activeFilter === "recent" && recentStations.length > 0) {
+      const recentIds = new Set(recentStations.map(r => r.station_id));
+      filtered = filtered.filter(station => recentIds.has(station.station_id));
+    }
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setSelectedStation(null);
-  };
+    return filtered;
+  }, [stations, searchQuery, activeFilter, recentStations]);
 
-  const handleStatusUpdate = () => {
-    refetch(); // Refresh stations data after status update
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Card className="p-8 text-center max-w-sm mx-4 animate-fade-in">
-          <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <Loader2 className="h-6 w-6 animate-spin text-white" />
-          </div>
-          <h2 className="text-xl font-bold mb-2">ChargeSure</h2>
-          <p className="text-muted-foreground">Finding charging stations with certainty...</p>
-        </Card>
-      </div>
-    );
-  }
+  // Sort stations by distance if location is available
+  const sortedStations = useMemo(() => {
+    if (!location) return filteredStations;
+    
+    return [...filteredStations].sort((a, b) => {
+      const distanceA = calculateDistance(
+        { latitude: location.latitude, longitude: location.longitude },
+        { latitude: a.latitude, longitude: a.longitude }
+      );
+      const distanceB = calculateDistance(
+        { latitude: location.latitude, longitude: location.longitude },
+        { latitude: b.latitude, longitude: b.longitude }
+      );
+      return distanceA - distanceB;
+    });
+  }, [filteredStations, location]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Offline Indicator */}
-      <OfflineIndicator />
-      
-      {/* Minimalist Header */}
-      <div className="bg-background/80 backdrop-blur-lg border-b border-border/30">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
+    <ErrorBoundary>
+      <div className="min-h-screen bg-background">
+        <OfflineIndicator />
+        
+        <div className="container mx-auto p-4 space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-3xl font-bold text-foreground">
+              EV Charging Stations
+            </h1>
+            <p className="text-muted-foreground">
+              Find and update electric vehicle charging stations near you
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <SearchBar 
+              onSearch={setSearchQuery} 
+              placeholder="Search by station name, address, or plug type..."
+              className="max-w-md mx-auto"
+            />
+            
+            <FilterChips 
+              activeFilter={activeFilter} 
+              onFilterChange={setActiveFilter}
+              locationEnabled={!!location}
+              hasRecentStations={recentStations.length > 0}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
+            <div className="bg-card rounded-lg shadow-sm border">
+              <div className="h-full">
+                <Map 
+                  stations={sortedStations} 
+                  userLocation={location ? { lat: location.latitude, lng: location.longitude } : null} 
+                />
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground outdoor-visibility">ChargeSure</h1>
-              <p className="text-xs text-muted-foreground">Charge with Certainty</p>
+            
+            <div className="overflow-hidden">
+              <StationsList 
+                stations={sortedStations} 
+                userLocation={location ? { lat: location.latitude, lng: location.longitude } : null}
+                isLoading={isLoading}
+                error={error}
+                searchQuery={searchQuery}
+              />
             </div>
           </div>
         </div>
       </div>
-
-      {/* Filter Section */}
-      {availablePlugTypes.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 pt-4 pb-4">
-          <FilterChips
-            availablePlugTypes={availablePlugTypes}
-            selectedPlugTypes={selectedPlugTypes}
-            onSelectionChange={setSelectedPlugTypes}
-            showAvailableOnly={showAvailableOnly}
-            onAvailableOnlyChange={setShowAvailableOnly}
-          />
-        </div>
-      )}
-
-      {/* Main Content with Tabs */}
-      <div className="max-w-7xl mx-auto px-4 pb-4">
-        <Tabs defaultValue="map" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-4 touch-target">
-            <TabsTrigger value="map" className="touch-target">Map View</TabsTrigger>
-            <TabsTrigger value="list" className="touch-target">List View</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="map" className="h-[70vh] rounded-lg overflow-hidden border border-border mobile-scroll">
-            <Map
-              stations={stations}
-              selectedPlugTypes={selectedPlugTypes}
-              showAvailableOnly={showAvailableOnly}
-              userLocation={location}
-              onStationClick={handleStationClick}
-            />
-          </TabsContent>
-          
-          <TabsContent value="list" className="max-h-[70vh] overflow-y-auto mobile-scroll">
-            <StationsList
-              stations={stations}
-              selectedPlugTypes={selectedPlugTypes}
-              showAvailableOnly={showAvailableOnly}
-              userLocation={location}
-              onStationClick={handleStationClick}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-
-      {/* Contextual Station Hub */}
-      <StationDetailsModal
-        station={selectedStation}
-        isOpen={isModalOpen}
-        onClose={handleModalClose}
-        onStatusUpdate={handleStatusUpdate}
-      />
-    </div>
+    </ErrorBoundary>
   );
-};
-
-export default Index;
+}

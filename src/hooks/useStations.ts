@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-interface Charger {
+export interface Charger {
   charger_id: string;
   plug_type: string;
   max_power_kw: number;
-  current_status: string;
+  current_status: "Available" | "In Use" | "Out of Service";
   last_update_timestamp: string;
 }
 
-interface Station {
+export interface Station {
   station_id: string;
   name: string;
   address: string;
@@ -20,17 +19,11 @@ interface Station {
 }
 
 export const useStations = () => {
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  const fetchStations = async () => {
-    try {
-      setLoading(true);
-      
-      // Fetch stations with their chargers
-      const { data: stationsData, error: stationsError } = await supabase
-        .from('stations')
+  return useQuery({
+    queryKey: ["stations"],
+    queryFn: async (): Promise<Station[]> => {
+      const { data, error } = await supabase
+        .from("stations")
         .select(`
           station_id,
           name,
@@ -46,68 +39,33 @@ export const useStations = () => {
           )
         `);
 
-      if (stationsError) {
-        console.error('Error fetching stations:', stationsError);
-        toast({
-          title: "Error",
-          description: "Failed to load charging stations",
-          variant: "destructive",
-        });
-        return;
+      if (error) {
+        throw new Error(`Failed to fetch stations: ${error.message}`);
       }
 
-      const formattedStations: Station[] = (stationsData || []).map(station => ({
-        station_id: station.station_id,
-        name: station.name,
-        address: station.address,
+      return data?.map(station => ({
+        ...station,
         latitude: Number(station.latitude),
         longitude: Number(station.longitude),
-        chargers: station.chargers || [],
-      }));
-
-      setStations(formattedStations);
-    } catch (error) {
-      console.error('Error in fetchStations:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load charging stations",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStations();
-  }, []);
-
-  // Set up real-time subscription for charger status updates
-  useEffect(() => {
-    const channel = supabase
-      .channel('chargers-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'chargers'
-        },
-        () => {
-          // Refetch stations when charger data changes
-          fetchStations();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  return {
-    stations,
-    loading,
-    refetch: fetchStations,
-  };
+        chargers: (station.chargers || []).map(charger => ({
+          ...charger,
+          current_status: charger.current_status as "Available" | "In Use" | "Out of Service"
+        }))
+      })) || [];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    retry: (failureCount, error) => {
+      // Retry up to 3 times with exponential backoff
+      if (failureCount >= 3) return false;
+      
+      // Don't retry on authentication errors
+      if (error?.message?.includes('JWT') || error?.message?.includes('auth')) {
+        return false;
+      }
+      
+      return true;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
 };
