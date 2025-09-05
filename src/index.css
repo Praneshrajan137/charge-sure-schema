@@ -59,6 +59,16 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Mobile-first improvements */
+    --touch-target-min: 44px; /* Minimum touch target size */
+    --mobile-padding: 1rem;
+    --outdoor-contrast-text: hsl(var(--foreground));
+    --outdoor-contrast-bg: hsl(var(--background));
+    
+    /* Offline mode indicator */
+    --offline-color: 220 17% 32%;
+    --offline-bg: 220 13% 91%;
   }
 
   .dark {
@@ -103,15 +113,16 @@ All colors MUST be HSL.
     --ev-in-use: 217 91% 70%;       /* Brighter blue for dark mode */
     --ev-out-of-service: 0 84% 70%; /* Brighter red for dark mode */
     --ev-unknown: 220 9% 56%;       /* Lighter gray for dark mode */
-  /* Mobile-first improvements */
-  --touch-target-min: 44px; /* Minimum touch target size */
-  --mobile-padding: 1rem;
-  --outdoor-contrast-text: hsl(var(--foreground));
-  --outdoor-contrast-bg: hsl(var(--background));
-  
-  /* Offline mode indicator */
-  --offline-color: 220 17% 32%;
-  --offline-bg: 220 13% 91%;
+  }
+
+  /* Base element styles */
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 /* Mobile optimizations */
@@ -219,14 +230,4 @@ button:focus-visible,
 
 .bg-ev-out-of-service {
   background-color: hsl(0 84% 60%);
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
 }
