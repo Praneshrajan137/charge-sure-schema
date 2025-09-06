@@ -27,6 +27,10 @@ import {
   Settings
 } from 'lucide-react';
 import StatusUpdateModal from './StatusUpdateModal';
+import { ChargerRating } from '@/components/ChargerRating';
+import { TrustIndicators } from '@/components/TrustIndicators';
+import { useAnalytics, ANALYTICS_EVENTS } from '@/hooks/useAnalytics';
+import { getDirectionsUrl } from '@/utils/directions';
 
 interface Charger {
   charger_id: string;
@@ -34,6 +38,10 @@ interface Charger {
   max_power_kw: number;
   current_status: string;
   last_update_timestamp: string;
+  last_verified_at?: string;
+  verification_count?: number;
+  rating_score?: number;
+  rating_count?: number;
 }
 
 interface Station {
@@ -100,6 +108,7 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   onStatusUpdate,
 }) => {
   const navigate = useNavigate();
+  const { trackEvent } = useAnalytics();
   const [activeTab, setActiveTab] = useState('status');
   const [statusUpdateModal, setStatusUpdateModal] = useState<{
     isOpen: boolean;
@@ -112,6 +121,18 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
 
   const handleStatusUpdateClose = () => {
     setStatusUpdateModal({ isOpen: false, charger: null });
+  };
+
+  const handleDirections = () => {
+    if (!station) return;
+    
+    trackEvent({
+      event_type: ANALYTICS_EVENTS.DIRECTIONS_REQUEST,
+      station_id: station.station_id,
+      event_data: { station_name: station.name }
+    });
+    
+    window.open(getDirectionsUrl(station), '_blank');
   };
   
   if (!station) return null;

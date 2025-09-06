@@ -7,6 +7,10 @@ export interface Charger {
   max_power_kw: number;
   current_status: "Available" | "In Use" | "Out of Service";
   last_update_timestamp: string;
+  last_verified_at?: string;
+  verification_count?: number;
+  rating_score?: number;
+  rating_count?: number;
 }
 
 export interface Station {
@@ -35,7 +39,11 @@ export const useStations = () => {
             plug_type,
             max_power_kw,
             current_status,
-            last_update_timestamp
+            last_update_timestamp,
+            last_verified_at,
+            verification_count,
+            rating_score,
+            rating_count
           )
         `);
 

@@ -102,7 +102,10 @@ export default function Index() {
               <div className="h-full">
                 <Map 
                   stations={sortedStations} 
-                  userLocation={location ? { lat: location.latitude, lng: location.longitude } : null} 
+                  selectedPlugTypes={[]}
+                  showAvailableOnly={false}
+                  userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
+                  onStationClick={() => {}}
                 />
               </div>
             </div>
@@ -110,10 +113,10 @@ export default function Index() {
             <div className="overflow-hidden">
               <StationsList 
                 stations={sortedStations} 
-                userLocation={location ? { lat: location.latitude, lng: location.longitude } : null}
-                isLoading={isLoading}
-                error={error}
-                searchQuery={searchQuery}
+                selectedPlugTypes={[]}
+                showAvailableOnly={false}
+                userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
+                onStationClick={() => {}}
               />
             </div>
           </div>

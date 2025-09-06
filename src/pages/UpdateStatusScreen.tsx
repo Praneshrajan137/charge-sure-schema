@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 const UpdateStatusScreen = () => {
   const { stationId } = useParams<{ stationId: string }>();
   const navigate = useNavigate();
-  const { stations } = useStations();
+  const { data: stations = [] } = useStations();
   const { toast } = useToast();
   const [updating, setUpdating] = useState<string | null>(null);
 

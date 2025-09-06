@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Zap, Clock, AlertTriangle, Navigation } from 'lucide-react';
 import { Coordinates, calculateDistance, formatDistance } from '@/utils/distance';
+import { ChargerRating } from '@/components/ChargerRating';
+import { TrustIndicators } from '@/components/TrustIndicators';
+import { getDirectionsUrl } from '@/utils/directions';
+import { useAnalytics, ANALYTICS_EVENTS } from '@/hooks/useAnalytics';
 
 interface Station {
   station_id: string;
@@ -17,6 +21,10 @@ interface Station {
     max_power_kw: number;
     current_status: string;
     last_update_timestamp: string;
+    last_verified_at?: string;
+    verification_count?: number;
+    rating_score?: number;
+    rating_count?: number;
   }>;
 }
 
@@ -35,6 +43,27 @@ const StationsList: React.FC<StationsListProps> = ({
   userLocation,
   onStationClick 
 }) => {
+  const { trackEvent } = useAnalytics();
+
+  const handleDirections = (station: Station) => {
+    trackEvent({
+      event_type: ANALYTICS_EVENTS.DIRECTIONS_REQUEST,
+      station_id: station.station_id,
+      event_data: { station_name: station.name }
+    });
+    
+    window.open(getDirectionsUrl(station), '_blank');
+  };
+
+  const handleStationClick = (station: Station) => {
+    trackEvent({
+      event_type: ANALYTICS_EVENTS.STATION_VIEW,
+      station_id: station.station_id,
+      event_data: { station_name: station.name }
+    });
+    
+    onStationClick(station);
+  };
   // Filter stations based on plug type and availability selection
   const filteredStations = stations.filter(station => {
     // Filter by plug type
@@ -124,7 +153,7 @@ const StationsList: React.FC<StationsListProps> = ({
           <Card 
             key={station.station_id} 
             className="p-4 cursor-pointer transition-colors hover:bg-accent/50"
-            onClick={() => onStationClick(station)}
+            onClick={() => handleStationClick(station)}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
