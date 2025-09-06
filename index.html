@@ -3,22 +3,47 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>charge-sure-schema</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>ChargeSure - EV Charging Station Finder</title>
+    <meta name="description" content="Find and update electric vehicle charging stations with real-time status. Discover available chargers near you." />
+    <meta name="author" content="ChargeSure" />
+    
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#0ea5e9" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="ChargeSure" />
+    <link rel="apple-touch-icon" href="/lovable-uploads/821cc246-5d70-40b9-9181-cde3a9a6b6fb.png" />
 
-    <meta property="og:title" content="charge-sure-schema" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <!-- Social Media -->
+    <meta property="og:title" content="ChargeSure - EV Charging Station Finder" />
+    <meta property="og:description" content="Find and update electric vehicle charging stations with real-time status. Discover available chargers near you." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:url" content="https://charge-sure-schema.netlify.app" />
+    <meta property="og:image" content="/lovable-uploads/821cc246-5d70-40b9-9181-cde3a9a6b6fb.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:title" content="ChargeSure - EV Charging Station Finder" />
+    <meta name="twitter:description" content="Find and update electric vehicle charging stations with real-time status" />
+    <meta name="twitter:image" content="/lovable-uploads/821cc246-5d70-40b9-9181-cde3a9a6b6fb.png" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Register service worker for PWA
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Button } from '@/components/ui/button';
@@ -34,25 +34,7 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [showTokenInput, setShowTokenInput] = useState(false);
-  
-  // Check for stored token on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem('mapbox-token');
-    if (storedToken) {
-      setMapboxToken(storedToken);
-      setShowTokenInput(false);
-      // Initialize map after a delay to ensure component is mounted
-      setTimeout(() => {
-        if (!map.current) {
-          initializeMap(storedToken);
-        }
-      }, 100);
-    } else {
-      setShowTokenInput(true);
-    }
-  }, []);
+  const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN; // Get token from environment variables
 
   const getStationPinStyle = (station: Station) => {
     const relevantChargers = station.chargers.filter(charger =>
@@ -95,7 +77,7 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
     return { color, size, isGolden, powerLevel };
   };
 
-  const createAdvancedMarkerElement = (station: Station) => {
+  const createAdvancedMarkerElement = useCallback((station: Station) => {
     const { color, size, isGolden, powerLevel } = getStationPinStyle(station);
     
     const el = document.createElement('div');
@@ -199,12 +181,17 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
     });
     
     return el;
-  };
+  }, [selectedPlugTypes, showAvailableOnly]); // Added dependencies
 
-  const initializeMap = (token: string) => {
+  const initializeMap = () => {
     if (!mapContainer.current || map.current) return;
 
-    mapboxgl.accessToken = token;
+    if (!mapboxToken) {
+      console.error("Mapbox token is missing. Please set VITE_MAPBOX_TOKEN in your .env file.");
+      return;
+    }
+
+    mapboxgl.accessToken = mapboxToken;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -240,7 +227,7 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
     updateMarkers();
   };
 
-  const updateMarkers = () => {
+  const updateMarkers = useCallback(() => {
     if (!map.current) return;
 
     // Clear existing markers
@@ -280,21 +267,19 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
 
       markers.current.push(marker);
     });
-  };
+  }, [stations, selectedPlugTypes, showAvailableOnly, onStationClick, createAdvancedMarkerElement]);
+
+  useEffect(() => {
+    if (mapboxToken) {
+      initializeMap();
+    }
+  }, [mapboxToken]); // Initialize map when token is available
 
   useEffect(() => {
     updateMarkers();
-  }, [stations, selectedPlugTypes, showAvailableOnly]);
+  }, [stations, selectedPlugTypes, showAvailableOnly, updateMarkers]);
 
-  const handleTokenSubmit = () => {
-    if (mapboxToken.trim()) {
-      localStorage.setItem('mapbox-token', mapboxToken.trim());
-      setShowTokenInput(false);
-      initializeMap(mapboxToken.trim());
-    }
-  };
-
-  if (showTokenInput) {
+  if (!mapboxToken) {
     return (
       <div className="relative w-full h-full flex items-center justify-center bg-muted">
         <Card className="p-6 max-w-md w-full mx-4">
@@ -303,23 +288,11 @@ const Map: React.FC<MapProps> = ({ stations, selectedPlugTypes, showAvailableOnl
             <h3 className="font-semibold">Mapbox Token Required</h3>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            To display the map, please enter your Mapbox public token.
+            To display the map, please set your Mapbox public token in the `.env.local` file.
           </p>
-          <div className="space-y-3">
-            <Input
-              type="text"
-              placeholder="pk.eyJ1IjoibXl1c2VybmFtZS..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleTokenSubmit()}
-            />
-            <Button onClick={handleTokenSubmit} className="w-full">
-              Load Map
-            </Button>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <AlertCircle className="h-3 w-3" />
-              <span>Get your token at mapbox.com</span>
-            </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <AlertCircle className="h-3 w-3" />
+            <span>Get your token at mapbox.com</span>
           </div>
         </Card>
       </div>
