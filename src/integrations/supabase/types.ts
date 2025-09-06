@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      charger_ratings: {
+        Row: {
+          charger_id: string
+          created_at: string
+          id: string
+          rating: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          charger_id: string
+          created_at?: string
+          id?: string
+          rating: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          charger_id?: string
+          created_at?: string
+          id?: string
+          rating?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       charger_status_updates: {
         Row: {
           charger_id: string
@@ -53,30 +80,42 @@ export type Database = {
           created_at: string
           current_status: string
           last_update_timestamp: string | null
+          last_verified_at: string | null
           max_power_kw: number
           plug_type: string
+          rating_count: number | null
+          rating_score: number | null
           station_id: string
           updated_at: string
+          verification_count: number | null
         }
         Insert: {
           charger_id: string
           created_at?: string
           current_status?: string
           last_update_timestamp?: string | null
+          last_verified_at?: string | null
           max_power_kw: number
           plug_type: string
+          rating_count?: number | null
+          rating_score?: number | null
           station_id: string
           updated_at?: string
+          verification_count?: number | null
         }
         Update: {
           charger_id?: string
           created_at?: string
           current_status?: string
           last_update_timestamp?: string | null
+          last_verified_at?: string | null
           max_power_kw?: number
           plug_type?: string
+          rating_count?: number | null
+          rating_score?: number | null
           station_id?: string
           updated_at?: string
+          verification_count?: number | null
         }
         Relationships: [
           {
@@ -115,6 +154,36 @@ export type Database = {
           name?: string
           station_id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_analytics: {
+        Row: {
+          charger_id: string | null
+          created_at: string
+          event_data: Json | null
+          event_type: string
+          id: string
+          station_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          charger_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          station_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          charger_id?: string | null
+          created_at?: string
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          station_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
