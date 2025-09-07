@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import UpdateStatusScreen from "./pages/UpdateStatusScreen";
+import FiltersPage from "./pages/FiltersPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,11 @@ const App = () => (
             <Route path="/station/:stationId/update" element={
               <ErrorBoundary>
                 <UpdateStatusScreen />
+              </ErrorBoundary>
+            } />
+            <Route path="/filters" element={
+              <ErrorBoundary>
+                <FiltersPage />
               </ErrorBoundary>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -17,8 +17,9 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* PlugShare Blue Theme */
+    --primary: 217 91% 34%; /* PlugShare Blue */
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -38,11 +39,14 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    /* EV Charging Station Colors */
-    --ev-available: 120 60% 50%;    /* Green for available chargers */
-    --ev-in-use: 217 91% 60%;       /* Blue for in-use chargers */
-    --ev-out-of-service: 0 84% 60%; /* Red for out-of-service */
-    --ev-unknown: 220 9% 46%;       /* Gray for unknown/stale data */
+    /* PlugShare Pin Colors */
+    --pin-public: 120 60% 50%;        /* Green - Public Available */
+    --pin-high-power: 25 95% 53%;     /* Orange - High Power */
+    --pin-restricted: 25 65% 45%;     /* Brown - Restricted */
+    --pin-in-use: 220 9% 46%;         /* Gray - In Use */
+    --pin-repair: 0 0% 20%;           /* Black - Under Repair */
+    --pin-residential: 180 60% 50%;   /* Teal - Residential */
+    --pin-place: 250 60% 50%;         /* Purple - Place */
 
     --sidebar-background: 0 0% 98%;
 
