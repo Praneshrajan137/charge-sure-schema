@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ChargeSureHeader } from "@/components/ChargeSureHeader";
 import { BottomNavigation } from "@/components/BottomNavigation";
 import StationsList from "@/components/StationsList";
-import Map from "@/components/Map";
+import { LeafletMap } from "@/components/LeafletMap";
 import { useStations } from "@/hooks/useStations";
 import { useLocation } from "@/hooks/useLocation";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -17,12 +17,10 @@ export default function StationsListPage() {
       case "map":
         return (
           <div className="flex-1 relative">
-            <Map 
+            <LeafletMap 
               stations={stations}
-              selectedPlugTypes={[]}
-              showAvailableOnly={false}
               userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
-              onStationClick={() => {}}
+              onStationClick={(station) => console.log('Station clicked:', station)}
             />
           </div>
         );
