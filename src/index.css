@@ -76,6 +76,118 @@
 /* Updated font configuration for Vite - using Inter from Google Fonts */
 
 @layer base {
+<<<<<<< HEAD
+=======
+  :root {
+    --background: 210 17% 97%; /* #F4F6F8 */
+    --foreground: 210 13% 11%; /* #1A202C */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 210 13% 11%; /* #1A202C */
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 13% 11%;
+    --primary: 210 13% 11%; /* #1A202C */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 17% 97%; /* #F4F6F8 */
+    --secondary-foreground: 210 13% 11%;
+    --muted: 210 17% 97%;
+    --muted-foreground: 215 16% 47%; /* #718096 */
+    --accent: 210 17% 97%;
+    --accent-foreground: 210 13% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 210 13% 11%;
+    --radius: 0.75rem;
+    
+    /* Custom ChargeSure colors */
+    --success: 120 100% 25%; /* Green for available status */
+    --success-foreground: 0 0% 100%;
+    --info: 200 100% 40%; /* Blue for power info */
+    --info-foreground: 0 0% 100%;
+
+    /* PlugShare Pin Colors */
+    --pin-public: 120 60% 50%;        /* Green - Public Available */
+    --pin-high-power: 25 95% 53%;     /* Orange - High Power */
+    --pin-restricted: 25 65% 45%;     /* Brown - Restricted */
+    --pin-in-use: 220 9% 46%;         /* Gray - In Use */
+    --pin-repair: 0 0% 20%;           /* Black - Under Repair */
+    --pin-residential: 180 60% 50%;   /* Teal - Residential */
+    --pin-place: 250 60% 50%;         /* Purple - Place */
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Mobile-first improvements */
+    --touch-target-min: 44px; /* Minimum touch target size */
+    --mobile-padding: 1rem;
+    --outdoor-contrast-text: hsl(var(--foreground));
+    --outdoor-contrast-bg: hsl(var(--background));
+    
+    /* Offline mode indicator */
+    --offline-color: 220 17% 32%;
+    --offline-bg: 220 13% 91%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* EV Charging Station Colors - Dark Mode */
+    --ev-available: 120 60% 60%;    /* Brighter green for dark mode */
+    --ev-in-use: 217 91% 70%;       /* Brighter blue for dark mode */
+    --ev-out-of-service: 0 84% 70%; /* Brighter red for dark mode */
+    --ev-unknown: 220 9% 56%;       /* Lighter gray for dark mode */
+  }
+
+  /* Base element styles */
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
   * {
     @apply border-border;
   }

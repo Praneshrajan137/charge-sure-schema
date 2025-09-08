@@ -1,9 +1,16 @@
+<<<<<<< HEAD
 import { useState, useMemo, useEffect } from "react";
 import { MapComponent } from "@/components/Map/MapComponent";
 import StationsList from "@/components/StationsList";
 import { FilterChips } from "@/components/FilterChips";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { EnhancedSearch } from "@/components/EnhancedSearch";
+=======
+import { useState, useMemo } from "react";
+import Map from "@/components/Map";
+import OfflineIndicator from "@/components/OfflineIndicator";
+import { PlugShareHeader } from "@/components/PlugShareHeader";
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StationsListSkeleton, MapSkeleton } from "@/components/LoadingSkeleton";
 import { useLocation } from "@/hooks/useLocation";
@@ -23,7 +30,6 @@ export default function Index() {
   
   const { location } = useLocation();
   const { recentStations } = useRecentStations();
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // 2. Data Fetching Logic
@@ -103,6 +109,7 @@ export default function Index() {
       );
     }
 
+<<<<<<< HEAD
     // Apply filters
     if (activeFilter === "available") {
       filtered = filtered.filter(station => 
@@ -117,8 +124,10 @@ export default function Index() {
       filtered = filtered.filter(station => recentIds.has(station?.station_id));
     }
 
+=======
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
     return filtered;
-  }, [stations, searchQuery, activeFilter, recentStations]);
+  }, [stations, searchQuery]);
 
   // Sort stations by distance if location is available
   const sortedStations = useMemo(() => {
@@ -223,9 +232,10 @@ export default function Index() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <OfflineIndicator />
         
+<<<<<<< HEAD
         <div className="container mx-auto p-4 space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-foreground">
@@ -271,6 +281,18 @@ export default function Index() {
               />
             </div>
           </div>
+=======
+        <PlugShareHeader onSearch={setSearchQuery} />
+        
+        <div className="flex-1 relative">
+          <Map 
+            stations={sortedStations} 
+            selectedPlugTypes={[]}
+            showAvailableOnly={false}
+            userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
+            onStationClick={() => {}}
+          />
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
         </div>
       </div>
     </ErrorBoundary>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/sonner"
 import React, { useEffect, Suspense } from "react"
@@ -9,14 +10,66 @@ import { Sidebar } from "./components/Sidebar"
 import { StationList } from "./components/StationList"
 import { LocationButton } from "./components/LocationButton"
 import { LoadingSpinner } from "./components/LoadingSpinner"
+=======
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import Index from "./pages/Index";
+import StationsListPage from "./pages/StationsListPage";
+import UpdateStatusScreen from "./pages/UpdateStatusScreen";
+import FiltersPage from "./pages/FiltersPage";
+import NotFound from "./pages/NotFound";
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
 
 // Lazy load the map component for better performance
 const MapComponent = React.lazy(() =>
   import("./components/Map/MapComponent").then((module) => ({ default: module.MapComponent })),
 )
 
+<<<<<<< HEAD
 function App() {
   const { isLoading, error, mapBounds, filters, setStations, setLoading, setError } = useAppStore()
+=======
+const App = () => (
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={
+              <ErrorBoundary>
+                <StationsListPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/plugshare" element={
+              <ErrorBoundary>
+                <Index />
+              </ErrorBoundary>
+            } />
+            <Route path="/station/:stationId/update" element={
+              <ErrorBoundary>
+                <UpdateStatusScreen />
+              </ErrorBoundary>
+            } />
+            <Route path="/filters" element={
+              <ErrorBoundary>
+                <FiltersPage />
+              </ErrorBoundary>
+            } />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
+);
+>>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
 
   // Load initial data
   useEffect(() => {
