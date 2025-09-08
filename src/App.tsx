@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
+import StationsListPage from "./pages/StationsListPage";
 import UpdateStatusScreen from "./pages/UpdateStatusScreen";
 import FiltersPage from "./pages/FiltersPage";
 import NotFound from "./pages/NotFound";
@@ -20,6 +21,11 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={
+              <ErrorBoundary>
+                <StationsListPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/plugshare" element={
               <ErrorBoundary>
                 <Index />
               </ErrorBoundary>
