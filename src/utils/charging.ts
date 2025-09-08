@@ -24,7 +24,7 @@ export const estimateChargingTime = (powerKw: number): ChargingEstimate => {
   
   const smallCarTime = (TYPICAL_BATTERY_SIZES.small * chargeAmount) / effectivePower;
   const mediumCarTime = (TYPICAL_BATTERY_SIZES.medium * chargeAmount) / effectivePower;
-  const largeCarTime = (TYPICAL_BATTERY_SIZES.large * chargeAmount) / effectivePower;
+  // const largeCarTime = (TYPICAL_BATTERY_SIZES.large * chargeAmount) / effectivePower;
 
   // Format time as hours and minutes
   const formatTime = (hours: number): string => {
@@ -54,27 +54,37 @@ export const getChargingSpeedCategory = (powerKw: number): string => {
   return "Slow";
 };
 
-export const getOptimalChargerForTrip = (chargers: any[], urgency: "low" | "medium" | "high" = "medium") => {
+interface Charger {
+  charger_id: string;
+  plug_type: string;
+  max_power_kw: number;
+  current_status: string;
+}
+
+export const getOptimalChargerForTrip = (chargers: Charger[], urgency: "low" | "medium" | "high" = "medium"): Charger | null => {
   const availableChargers = chargers.filter(c => c.current_status === "Available");
   
   if (availableChargers.length === 0) return null;
   
   switch (urgency) {
-    case "high":
+    case "high": {
       // Find fastest available charger
       return availableChargers.reduce((best, current) => 
         current.max_power_kw > best.max_power_kw ? current : best
       );
+    }
     
-    case "low":
+    case "low": {
       // Find slowest available charger (cheaper, less wear on battery)
       return availableChargers.reduce((best, current) => 
         current.max_power_kw < best.max_power_kw ? current : best
       );
+    }
     
-    default:
+    default: {
       // Find moderate speed charger (good balance)
       const moderateChargers = availableChargers.filter(c => c.max_power_kw >= 50 && c.max_power_kw <= 150);
       return moderateChargers.length > 0 ? moderateChargers[0] : availableChargers[0];
+    }
   }
 };

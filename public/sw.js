@@ -2,8 +2,8 @@ const CACHE_NAME = 'chargesure-v1';
 const STATIC_CACHE_URLS = [
   '/',
   '/index.html',
-  '/static/js/bundle.js',
-  '/static/css/bundle.css'
+  '/assets/',
+  '/src/'
 ];
 
 // Install event - cache essential resources

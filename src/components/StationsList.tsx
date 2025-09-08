@@ -1,13 +1,10 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Zap, Clock, AlertTriangle, Navigation } from 'lucide-react';
 import { Coordinates, calculateDistance, formatDistance } from '@/utils/distance';
-import { ChargerRating } from '@/components/ChargerRating';
-import { TrustIndicators } from '@/components/TrustIndicators';
-import { getDirectionsUrl } from '@/utils/directions';
-import { useAnalytics, ANALYTICS_EVENTS } from '@/hooks/useAnalytics';
+// removed unused imports
+// directions and analytics imported where needed
 
 interface Station {
   station_id: string;
@@ -43,41 +40,42 @@ const StationsList: React.FC<StationsListProps> = ({
   userLocation,
   onStationClick 
 }) => {
-  const { trackEvent } = useAnalytics();
+  // analytics disabled for now
 
-  const handleDirections = (station: Station) => {
-    trackEvent({
-      event_type: ANALYTICS_EVENTS.DIRECTIONS_REQUEST,
-      station_id: station.station_id,
-      event_data: { station_name: station.name }
-    });
-    
-    window.open(getDirectionsUrl(station), '_blank');
-  };
+  // directions handled where needed
 
   const handleStationClick = (station: Station) => {
-    trackEvent({
-      event_type: ANALYTICS_EVENTS.STATION_VIEW,
-      station_id: station.station_id,
-      event_data: { station_name: station.name }
-    });
-    
     onStationClick(station);
   };
+
+  // Safety check for stations array
+  if (!stations || !Array.isArray(stations)) {
+    return (
+      <div className="flex items-center justify-center h-64 text-muted-foreground">
+        <p>No station data available</p>
+      </div>
+    );
+  }
+
   // Filter stations based on plug type and availability selection
   const filteredStations = stations.filter(station => {
+    // Safety check: ensure station has valid chargers array
+    if (!station || !station.chargers || !Array.isArray(station.chargers) || station.chargers.length === 0) {
+      return false;
+    }
+    
     // Filter by plug type
     const hasMatchingPlugType = selectedPlugTypes.length === 0 || 
-      station.chargers.some(charger => selectedPlugTypes.includes(charger.plug_type));
+      station.chargers.some(charger => charger && charger.plug_type && selectedPlugTypes.includes(charger.plug_type));
     
     if (!hasMatchingPlugType) return false;
     
     // Filter by availability if enabled
     if (showAvailableOnly) {
       const relevantChargers = station.chargers.filter(charger =>
-        selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type)
+        charger && charger.plug_type && (selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type))
       );
-      return relevantChargers.some(charger => charger.current_status === 'Available');
+      return relevantChargers.some(charger => charger && charger.current_status === 'Available');
     }
     
     return true;
@@ -102,13 +100,22 @@ const StationsList: React.FC<StationsListProps> = ({
   };
 
   const getAvailabilityStatus = (station: Station) => {
+    // Safety check: ensure station has valid chargers array
+    if (!station || !station.chargers || !Array.isArray(station.chargers) || station.chargers.length === 0) {
+      return { text: 'No Data', variant: 'outline' as const };
+    }
+    
     const relevantChargers = station.chargers.filter(charger =>
-      selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type)
+      charger && charger.plug_type && (selectedPlugTypes.length === 0 || selectedPlugTypes.includes(charger.plug_type))
     );
     
-    const available = relevantChargers.filter(c => c.current_status === 'Available').length;
+    if (relevantChargers.length === 0) {
+      return { text: 'No Matching Plugs', variant: 'outline' as const };
+    }
+    
+    const available = relevantChargers.filter(c => c && c.current_status === 'Available').length;
     const total = relevantChargers.length;
-    const hasOutOfService = relevantChargers.some(c => c.current_status === 'Out of Service');
+    const hasOutOfService = relevantChargers.some(c => c && c.current_status === 'Out of Service');
     
     if (hasOutOfService && available === 0) return { text: 'Issues Reported', variant: 'destructive' as const };
     if (available === 0) return { text: 'All In Use', variant: 'secondary' as const };
@@ -144,7 +151,12 @@ const StationsList: React.FC<StationsListProps> = ({
       
       {sortedStations.map((station) => {
         const status = getAvailabilityStatus(station);
-        const maxPower = Math.max(...station.chargers.map(c => c.max_power_kw));
+        
+        // Safety check for maxPower calculation
+        const maxPower = station.chargers && Array.isArray(station.chargers) && station.chargers.length > 0
+          ? Math.max(...station.chargers.map(c => c.max_power_kw || 0).filter(power => !isNaN(power)))
+          : 0;
+          
         const distance = userLocation 
           ? calculateDistance(userLocation, { latitude: station.latitude, longitude: station.longitude })
           : null;
@@ -180,21 +192,26 @@ const StationsList: React.FC<StationsListProps> = ({
                     <span>Up to {maxPower}kW</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span>{station.chargers.length} charger{station.chargers.length !== 1 ? 's' : ''}</span>
+                    <span>
+                      {station.chargers && Array.isArray(station.chargers) ? station.chargers.length : 0} charger{((station.chargers?.length || 0) !== 1 ? 's' : '')}
+                    </span>
                   </div>
                 </div>
               </div>
               
               <div className="flex flex-col items-end gap-1">
-                {station.chargers.slice(0, 3).map((charger) => (
-                  <div key={charger.charger_id} className="flex items-center gap-1">
-                    {getStatusIcon(charger.current_status)}
-                    <span className="text-xs text-muted-foreground">
-                      {charger.plug_type}
-                    </span>
-                  </div>
-                ))}
-                {station.chargers.length > 3 && (
+                {station.chargers && Array.isArray(station.chargers) 
+                  ? station.chargers.slice(0, 3).map((charger) => (
+                      <div key={charger.charger_id} className="flex items-center gap-1">
+                        {getStatusIcon(charger.current_status)}
+                        <span className="text-xs text-muted-foreground">
+                          {charger.plug_type || 'Unknown'}
+                        </span>
+                      </div>
+                    ))
+                  : null
+                }
+                {station.chargers && station.chargers.length > 3 && (
                   <span className="text-xs text-muted-foreground">
                     +{station.chargers.length - 3} more
                   </span>

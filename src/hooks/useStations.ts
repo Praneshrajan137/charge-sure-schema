@@ -51,13 +51,18 @@ export const useStations = () => {
         throw new Error(`Failed to fetch stations: ${error.message}`);
       }
 
-      return data?.map(station => ({
+      return (data || []).map(station => ({
         ...station,
         latitude: Number(station.latitude),
         longitude: Number(station.longitude),
         chargers: (station.chargers || []).map(charger => ({
           ...charger,
-          current_status: charger.current_status as "Available" | "In Use" | "Out of Service"
+          current_status: charger.current_status as "Available" | "In Use" | "Out of Service",
+          last_update_timestamp: String(charger.last_update_timestamp ?? ""),
+          last_verified_at: charger.last_verified_at ?? undefined,
+          verification_count: charger.verification_count ?? undefined,
+          rating_score: charger.rating_score ?? undefined,
+          rating_count: charger.rating_count ?? undefined
         }))
       })) || [];
     },

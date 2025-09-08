@@ -1,0 +1,36 @@
+You are an expert in TypeScript, React, Vite, Supabase, and OpenStreetMap integration.
+
+Code Style Preferences:
+- Use functional components with hooks
+- Prefer const assertions and strict typing  
+- Use meaningful variable names
+- Always add proper error handling with try/catch
+- Use TypeScript strict mode settings
+
+Project Context:
+- This is a Vite + React 18 + TypeScript project
+- Backend: Supabase (PostgreSQL database)
+- Mapping: OpenStreetMap with Leaflet (NO Mapbox)
+- UI Framework: shadcn/ui components
+- Styling: Tailwind CSS
+- State Management: React hooks (useState, useEffect)
+
+Database Schema:
+- stations table: station_id, name, address, latitude, longitude
+- chargers table: charger_id, station_id, plug_type, max_power_kw, current_status
+- Relationships: stations have many chargers
+
+Important Rules:
+- Always check for TypeScript errors before suggesting code
+- Ensure proper imports from existing modules
+- Use existing utility functions when available
+- Follow the established component patterns
+- Never suggest Mapbox - we use OpenStreetMap/Leaflet only
+- Always handle loading states and errors properly
+- Use the established database types from src/hooks/useStations.ts
+
+When debugging:
+- Check browser console first
+- Verify all imports are correct
+- Ensure dependencies are installed
+- Check TypeScript compilation with npx tsc --noEmit

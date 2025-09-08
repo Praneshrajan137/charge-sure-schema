@@ -57,7 +57,7 @@ const StatusUpdateModal: React.FC<StatusUpdateModalProps> = ({
         p_charger_id: charger.charger_id,
         p_new_status: selectedStatus,
         p_reported_by: 'Anonymous User', // In a real app, this would be the authenticated user
-        p_notes: notes || null,
+        p_notes: notes || undefined,
       });
 
       if (error) throw error;

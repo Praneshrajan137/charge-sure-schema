@@ -27,10 +27,8 @@ import {
   Settings
 } from 'lucide-react';
 import StatusUpdateModal from './StatusUpdateModal';
-import { ChargerRating } from '@/components/ChargerRating';
-import { TrustIndicators } from '@/components/TrustIndicators';
-import { useAnalytics, ANALYTICS_EVENTS } from '@/hooks/useAnalytics';
-import { getDirectionsUrl } from '@/utils/directions';
+// imports removed as they are currently unused
+// analytics hook currently unused
 
 interface Charger {
   charger_id: string;
@@ -108,7 +106,7 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
   onStatusUpdate,
 }) => {
   const navigate = useNavigate();
-  const { trackEvent } = useAnalytics();
+  // analytics available for future use
   const [activeTab, setActiveTab] = useState('status');
   const [statusUpdateModal, setStatusUpdateModal] = useState<{
     isOpen: boolean;
@@ -123,17 +121,7 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
     setStatusUpdateModal({ isOpen: false, charger: null });
   };
 
-  const handleDirections = () => {
-    if (!station) return;
-    
-    trackEvent({
-      event_type: ANALYTICS_EVENTS.DIRECTIONS_REQUEST,
-      station_id: station.station_id,
-      event_data: { station_name: station.name }
-    });
-    
-    window.open(getDirectionsUrl(station), '_blank');
-  };
+  // directions handled via getDirectionsUrl usage where needed
   
   if (!station) return null;
 
@@ -156,9 +144,18 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
     navigate(`/station/${station.station_id}/update`);
   };
 
-  const availableCount = station.chargers.filter(c => c.current_status === 'Available').length;
-  const totalCount = station.chargers.length;
-  const maxPower = Math.max(...station.chargers.map(c => c.max_power_kw));
+  // Safety checks for station data
+  const availableCount = station.chargers && Array.isArray(station.chargers) 
+    ? station.chargers.filter(c => c && c.current_status === 'Available').length
+    : 0;
+    
+  const totalCount = station.chargers && Array.isArray(station.chargers) 
+    ? station.chargers.length 
+    : 0;
+    
+  const maxPower = station.chargers && Array.isArray(station.chargers) && station.chargers.length > 0
+    ? Math.max(...station.chargers.map(c => c.max_power_kw || 0).filter(power => !isNaN(power)))
+    : 0;
 
   return (
     <>
@@ -233,7 +230,7 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
 
               {/* Chargers List */}
               <div className="space-y-3">
-                {station.chargers.map((charger) => (
+                {station.chargers && Array.isArray(station.chargers) ? station.chargers.map((charger) => (
                   <div
                     key={charger.charger_id}
                     className="group flex items-center justify-between p-4 rounded-xl border hover-lift transition-all duration-300"
@@ -273,7 +270,14 @@ const StationDetailsModal: React.FC<StationDetailsModalProps> = ({
                       </Button>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="text-center text-gray-500 py-8">
+                    <div className="flex flex-col items-center">
+                      <Zap className="h-12 w-12 text-gray-300 mb-2" />
+                      <p>No charging ports data available</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </TabsContent>
 

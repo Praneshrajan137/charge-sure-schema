@@ -1,0 +1,476 @@
+[
+  {
+    "id": "TC001",
+    "title": "Interactive Map Loads and Displays User Location and Charging Stations",
+    "description": "Verify that the interactive map loads correctly, showing the user's current position and all nearby EV charging stations with appropriate custom markers.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the ChargeSure PWA in a supported browser with geolocation enabled."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the map centered correctly on the user's current location."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that all EV charging stations within the viewport are displayed with custom markers."
+      },
+      {
+        "type": "action",
+        "description": "Zoom and pan the map."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that map markers update dynamically as the viewport changes."
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Advanced Search and Filtering Functionality",
+    "description": "Ensure the search bar returns relevant EV charging stations based on keyword, plug type, availability status, and user location with sorting options.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the search interface."
+      },
+      {
+        "type": "action",
+        "description": "Enter a valid text query for station name or location."
+      },
+      {
+        "type": "action",
+        "description": "Apply plug type filter to select specific plug types."
+      },
+      {
+        "type": "action",
+        "description": "Apply availability filter to show only available chargers."
+      },
+      {
+        "type": "action",
+        "description": "Select location-based sorting option (e.g., nearest first)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the search results list and map markers match the filter criteria and query."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that autocomplete suggestions appear as text is typed."
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "Station List Displays Detailed Information and Sorts Correctly",
+    "description": "Check that the station list shows complete station details including distances and that sorting by distance and ratings works correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the station list component."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify each station item displays name, address, distance from user, number of chargers, and average rating."
+      },
+      {
+        "type": "action",
+        "description": "Sort the list by distance ascending."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that stations are correctly ordered by closest to farthest."
+      },
+      {
+        "type": "action",
+        "description": "Sort the list by highest ratings."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify stations are ordered descending by average user rating."
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Station Details Modal Displays Complete and Accurate Information",
+    "description": "Verify that tapping a station marker or list item opens a modal showing charger specifications, user ratings, trust indicators, and recent updates accurately.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Click on a station marker or select a station from the list."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the modal opens and displays name, location, charger specs (plug types, power), and number of chargers."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify user ratings and feedback are visible and match backend data."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify trust indicators (verification badges or community flags) are displayed if applicable."
+      },
+      {
+        "type": "action",
+        "description": "Close the modal."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the modal closes without errors."
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Charger Rating System Accepts and Reflects User Feedback",
+    "description": "Confirm that users can submit star ratings and written feedback for individual chargers and that these ratings update in real time for all users.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the charger rating interface for a specific charger."
+      },
+      {
+        "type": "action",
+        "description": "Submit a valid star rating and accompanying text feedback."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify successful submission confirmation is shown."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the new rating is reflected immediately in the charger’s average rating."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the feedback appears in the user reviews list."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit invalid ratings or empty feedback."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate error messages appear and submission is blocked."
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Real-time Status Update System Updates Charger Conditions Accurately",
+    "description": "Ensure that users can report charger statuses (e.g., faulty, busy) and that these updates propagate in real time to other users’ views.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the status update modal for a selected charger."
+      },
+      {
+        "type": "action",
+        "description": "Submit a valid status update (e.g., 'Out of order' or 'Occupied')."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify confirmation message for successful status update submission."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the updated status is reflected immediately in charger details for the reporting user."
+      },
+      {
+        "type": "action",
+        "description": "In another client/session, verify that the updated status is also displayed in real time."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit an invalid or incomplete status update."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate error handling prevents submission and notifies the user."
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Geolocation Services Display Accurate User Location and Provide Directions",
+    "description": "Validate that the app correctly obtains the user’s current geolocation, calculates distances to stations accurately, and provides route directions.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Grant location permissions when prompted."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the user location appears on the map correctly."
+      },
+      {
+        "type": "action",
+        "description": "Select a charging station and request directions."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that navigation routes are calculated correctly and shown."
+      },
+      {
+        "type": "action",
+        "description": "Select a station far from the user and verify the distance calculation."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify distance displayed matches expected geographic calculations."
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Recent Locations Management Persists and Displays Recently Viewed Stations",
+    "description": "Check that recently viewed stations are stored persistently in local storage and displayed accurately on relevant user interfaces.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "View details for multiple different charging stations."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that each viewed station is added to the recent locations list."
+      },
+      {
+        "type": "action",
+        "description": "Reload the app or close and reopen the browser."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that recent locations are persisted and displayed correctly."
+      },
+      {
+        "type": "action",
+        "description": "Clear recent location list using app interface if available."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the recent locations list is cleared and local storage updated."
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Offline Support Loads Cache and Provides Limited Functionality While Disconnected",
+    "description": "Verify that the app loads cached data when offline, shows appropriate UI indicators, and performs with limited functionality without errors.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Load the app online and navigate to multiple screens/stations."
+      },
+      {
+        "type": "action",
+        "description": "Turn off network connection."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the app loads previously cached data."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the Offline indicator UI component is shown."
+      },
+      {
+        "type": "action",
+        "description": "Attempt to perform a live status update or rating submission."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify graceful failure or queuing of actions with clear user messaging."
+      },
+      {
+        "type": "action",
+        "description": "Navigate between cached screens."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify smooth navigation without crashes or errors."
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "PWA Installation Banner Appears and Installation Succeeds",
+    "description": "Check that the PWA installation prompt banner is displayed appropriately on supported devices and that installation completes successfully.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Access the app on a supported mobile browser."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the PWA installation banner appears after initial load."
+      },
+      {
+        "type": "action",
+        "description": "Click on the install button in the banner."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the app installs as a PWA on the device."
+      },
+      {
+        "type": "action",
+        "description": "Launch the installed app."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the app opens correctly and supports offline mode."
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "User Interface Is Responsive and Accessible Across Devices",
+    "description": "Ensure the UI correctly adapts to different screen sizes, orientations, and supports touch interactions with no usability or accessibility issues.",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open the app on desktop, tablet, and mobile devices and resize window dynamically."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify components adjust layout properly, content is readable, and controls are reachable without horizontal scrolling."
+      },
+      {
+        "type": "action",
+        "description": "Use touch gestures on mobile device for map navigation and list scrolling."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify touch interactions respond smoothly and UI elements have adequate size."
+      },
+      {
+        "type": "action",
+        "description": "Use accessibility tools (keyboard navigation, screen readers) to interact with the app."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify appropriate ARIA labels, focus management, and no accessibility violations."
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Error Handling Shows Friendly Messages and Recovers Gracefully",
+    "description": "Validate that unexpected errors in map loading, station data fetching, or network failures show user-friendly error messages and do not crash the app.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Simulate network failure or API errors during station data fetch."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that a friendly error message is presented to the user."
+      },
+      {
+        "type": "action",
+        "description": "Try to interact with broken components after error."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the app remains responsive and allows retry or fallback actions."
+      },
+      {
+        "type": "action",
+        "description": "Trigger an uncaught exception in UI components (e.g., forced error boundary)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify error boundary displays and recovers UI without crashes."
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Analytics Capture User Events Accurately Without Performance Impact",
+    "description": "Verify that user interactions such as searches, station views, and rating submissions are accurately tracked and sent to the analytics backend without degrading app performance.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Perform multiple user actions including searches, station detail views, ratings submissions, and status updates."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that analytic events corresponding to each action are logged and transmitted."
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the app responsiveness and load times remain consistent during intensive user interactions."
+      },
+      {
+        "type": "action",
+        "description": "Disable analytics and verify no errors occur in the app."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify the app functions normally without analytics service."
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Database Schema and Data Seeding Maintain Consistent and Complete Test Data",
+    "description": "Validate database migration scripts and data seeding scripts create a consistent schema with valid seed data that supports all functional testing.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Run database migration scripts on a clean PostgreSQL instance."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all tables, indexes, and security policies are created as per schema."
+      },
+      {
+        "type": "action",
+        "description": "Execute data seeding scripts to populate charging station, charger, and rating data."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that seeded data matches expected structure and includes diverse test cases."
+      },
+      {
+        "type": "action",
+        "description": "Query seeded data through Supabase API for key entities (stations, chargers, ratings)."
+      },
+      {
+        "type": "assertion",
+        "description": "Verify data integrity and referential constraints are maintained."
+      }
+    ]
+  }
+]

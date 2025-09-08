@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 
 export interface AnalyticsEvent {
   event_type: string;
-  event_data?: Record<string, any>;
+  event_data?: Record<string, unknown>;
   station_id?: string;
   charger_id?: string;
 }
@@ -18,7 +19,7 @@ export const useAnalytics = () => {
         .insert({
           user_id: user?.id || null,
           event_type: event.event_type,
-          event_data: event.event_data || null,
+          event_data: (event.event_data as unknown as Json) ?? null,
           station_id: event.station_id || null,
           charger_id: event.charger_id || null,
         });

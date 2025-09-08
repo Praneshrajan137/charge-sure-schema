@@ -1,0 +1,16 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:8085",
+  "executionArgs": {
+    "projectName": "charge-sure-schema",
+    "projectPath": "C:\\Users\\ADMIN\\Desktop\\charge\\charge-sure-schema",
+    "testIds": [],
+    "additionalInstruction": "Frontend running on http://localhost:8085. Use testsprite_tests/tmp/code_summary.json for context. Generate tests and execute; save markdown report to testsprite_tests/testsprite-mcp-test-report.md.",
+    "envs": {
+      "API_KEY": "sk-user-kIl-oHaZsoi6UNzXwo93eaffE24rQJp6hAnjuZLrAZT_y_tVLoWpXAUOHP7eGZoFXfUKpgHYzs04Nv4pjCyxK0KscQGgzn0eXQLoe6Txj31ES9p8-E8aXuDZffBarI6PO8s"
+    }
+  },
+  "proxy": "http://d0603f6a-8bf1-44fc-93e7-0fda16d2bfa0:aTncj1dBAhzSSMkUEyUPwhUgwQgX6hPs@tun.testsprite.com:8080"
+}

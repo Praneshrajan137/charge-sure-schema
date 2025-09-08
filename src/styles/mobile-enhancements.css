@@ -1,0 +1,237 @@
+/* Mobile-First Touch Enhancements */
+
+/* Touch-friendly interaction class */
+.touch-manipulation {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* Enhanced touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Active state animations */
+.active\:scale-95:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease-out;
+}
+
+.active\:scale-98:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-out;
+}
+
+/* Smooth hover effects */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease-out;
+}
+
+/* Bottom sheet specific styles */
+.bottom-sheet-backdrop {
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+/* Improved scrolling for mobile */
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .text-responsive-lg {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+}
+
+/* Safe area handling for iOS */
+@supports (padding-top: constant(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: constant(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: constant(safe-area-inset-bottom);
+  }
+}
+
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.focus-ring:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Loading animations */
+@keyframes pulse-scale {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-scale {
+  animation: pulse-scale 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Swipe indicator */
+@keyframes bounce-y {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  40%, 43% {
+    transform: translate3d(0, -5px, 0);
+  }
+  70% {
+    transform: translate3d(0, -3px, 0);
+  }
+  90% {
+    transform: translate3d(0, -1px, 0);
+  }
+}
+
+.animate-bounce-y {
+  animation: bounce-y 2s infinite;
+}
+
+/* Responsive container queries */
+@container (max-width: 480px) {
+  .container-responsive {
+    padding: 0.5rem;
+  }
+}
+
+@container (min-width: 481px) and (max-width: 768px) {
+  .container-responsive {
+    padding: 1rem;
+  }
+}
+
+@container (min-width: 769px) {
+  .container-responsive {
+    padding: 1.5rem;
+  }
+}
+
+/* Enhanced button states */
+.btn-primary {
+  @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg;
+  @apply touch-manipulation active:scale-95;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+  @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  transition: all 0.2s ease-out;
+}
+
+.btn-primary:hover:not(:disabled) {
+  @apply bg-blue-700;
+}
+
+.btn-primary:active:not(:disabled) {
+  @apply bg-blue-800;
+}
+
+/* Card hover effects */
+.card-interactive {
+  @apply transition-all duration-200 ease-out;
+  @apply hover:shadow-md hover:-translate-y-0.5;
+  @apply active:scale-98 active:shadow-sm;
+  @apply touch-manipulation cursor-pointer;
+}
+
+/* Pull-to-refresh indicator */
+.pull-refresh-indicator {
+  @apply absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-full;
+  @apply bg-white rounded-full shadow-lg p-2 transition-transform duration-300;
+}
+
+.pull-refresh-active .pull-refresh-indicator {
+  @apply translate-y-2;
+}
+
+/* Enhanced map controls */
+.map-control {
+  @apply bg-white rounded-lg shadow-md border border-gray-200;
+  @apply touch-manipulation active:scale-95;
+  @apply p-2 m-2;
+}
+
+/* Bottom sheet drag handle */
+.drag-handle {
+  @apply w-12 h-1 bg-gray-300 rounded-full;
+  @apply mx-auto mb-2 cursor-grab active:cursor-grabbing;
+}
+
+.drag-handle:hover {
+  @apply bg-gray-400;
+}
+
+/* Search result animations */
+@keyframes slide-in-down {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.search-results-enter {
+  animation: slide-in-down 0.2s ease-out;
+}
+
+/* Loading skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.loading-skeleton {
+  @apply bg-gray-200 rounded;
+  background-image: linear-gradient(90deg, #f0f0f0 0px, #e0e0e0 40px, #f0f0f0 80px);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+

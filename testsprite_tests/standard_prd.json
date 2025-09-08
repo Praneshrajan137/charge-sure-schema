@@ -1,0 +1,252 @@
+{
+  "meta": {
+    "project": "ChargeSure",
+    "date": "2025-09-05",
+    "prepared_by": "Software Development Manager"
+  },
+  "product_overview": "ChargeSure is a Progressive Web Application designed for electric vehicle (EV) owners to find, evaluate, and report on charging stations with real-time community-driven updates, providing a seamless and reliable charging experience.",
+  "core_goals": [
+    "Enable EV owners to locate nearby charging stations easily via an interactive map and search functionalities.",
+    "Provide real-time data on charger availability and status through community contributions.",
+    "Offer detailed station and charger information with user ratings and reviews.",
+    "Support offline access and mobile app-like experience through PWA capabilities.",
+    "Facilitate navigation with integrated directions and optimized route planning.",
+    "Ensure high performance, reliability, and user engagement with responsive design and efficient data management."
+  ],
+  "key_features": [
+    "Interactive Map Display based on OpenStreetMap and Leaflet showing EV charging stations with custom markers and user location.",
+    "Advanced Station Search and Filtering options including text search, plug type, availability filtering, and location-based sorting.",
+    "Station List Display presenting detailed station information, distances, and sorting abilities.",
+    "Comprehensive Station Details Modal with charger specifications, user ratings, and trust indicators.",
+    "Charger Rating System enabling users to provide star ratings and feedback on individual chargers.",
+    "Real-time Status Update System for community-driven reporting and verification of charger conditions.",
+    "Geolocation and Location Services for user position tracking, distance calculations, and route directions.",
+    "Recent Locations Management for tracking and displaying recently viewed stations with persistent local storage.",
+    "Offline Support and PWA Installation banners providing offline caching, service worker management, and installation prompts.",
+    "User Interaction Analytics capturing station views, searches, and user behavior patterns.",
+    "Mobile-Responsive UI optimized for touch and smaller screens with enhanced usability.",
+    "Error Handling system ensuring graceful failures and user-friendly error messages.",
+    "UI Component Library using shadcn/ui with Tailwind CSS for consistent, accessible design.",
+    "Database Schema Management and Data Seeding tools for robust backend data integrity and testing.",
+    "PlugShare-like Interface components for familiar user experience.",
+    "Dedicated Search Interface with autocomplete and suggestions."
+  ],
+  "user_flow_summary": [
+    "User opens the app and sees an interactive map displaying nearby EV charging stations based on their location or search query.",
+    "User applies filters such as plug type or availability to refine the list and map markers of stations.",
+    "User taps on a station marker or list item to view detailed information in a modal, including ratings and charger specs.",
+    "User rates a charger or submits status updates through intuitive UI modals to contribute to community data accuracy.",
+    "User uses geolocation services to get directions to a chosen charging station.",
+    "App provides offline access via PWA features, showing cached data and allowing limited functionality when offline.",
+    "User installs the app as a PWA on their mobile device for repeated use and better performance.",
+    "Analytics capture user interactions to help guide future improvements and validate usage patterns."
+  ],
+  "validation_criteria": [
+    "Interactive map displays accurate and up-to-date charging station locations and user position.",
+    "Search and filtering return relevant and correct station data quickly.",
+    "Station details modals show complete and correct charger information and user ratings.",
+    "Rating and status update systems accept, validate, and reflect user input in real time.",
+    "Geolocation services correctly identify user location and provide accurate navigation routes.",
+    "Offline support reliably caches data and allows access with limited functionality when disconnected.",
+    "PWA installation banners appear appropriately and installation succeeds on supported devices.",
+    "User interface is responsive and accessible across different screen sizes and devices.",
+    "Error handling gracefully manages unexpected issues with user-friendly messages.",
+    "Analytics accurately capture user events without impacting performance.",
+    "Database schema and data seeding scripts maintain consistent data integrity and support testing."
+  ],
+  "code_summary": {
+    "tech_stack": [
+      "TypeScript",
+      "React 18",
+      "Vite",
+      "Supabase",
+      "PostgreSQL",
+      "OpenStreetMap",
+      "Leaflet",
+      "React-Leaflet",
+      "Tailwind CSS",
+      "shadcn/ui",
+      "React Query",
+      "React Router",
+      "PWA"
+    ],
+    "features": [
+      {
+        "name": "Interactive Map Display",
+        "description": "OpenStreetMap-based interactive map showing EV charging stations with custom markers, user location, and station popups",
+        "files": [
+          "src/components/Map.tsx",
+          "src/utils/distance.ts"
+        ]
+      },
+      {
+        "name": "Station Data Management",
+        "description": "Comprehensive system for fetching, caching, and managing EV charging station data from Supabase database",
+        "files": [
+          "src/hooks/useStations.ts",
+          "src/integrations/supabase/client.ts",
+          "src/integrations/supabase/types.ts"
+        ]
+      },
+      {
+        "name": "Station Search and Filtering",
+        "description": "Advanced search functionality with text search, plug type filtering, availability filtering, and location-based sorting",
+        "files": [
+          "src/components/EnhancedSearch.tsx",
+          "src/components/FilterChips.tsx",
+          "src/components/PlugShareFilters.tsx"
+        ]
+      },
+      {
+        "name": "Station List Display",
+        "description": "Scrollable list of charging stations with detailed information, distance calculations, and sorting capabilities",
+        "files": [
+          "src/components/StationsList.tsx",
+          "src/components/LoadingSkeleton.tsx"
+        ]
+      },
+      {
+        "name": "Station Details Modal",
+        "description": "Comprehensive modal displaying detailed station information, charger specifications, ratings, and trust indicators",
+        "files": [
+          "src/components/StationDetailsModal.tsx",
+          "src/components/EnhancedStationDetails.tsx",
+          "src/components/TrustIndicators.tsx"
+        ]
+      },
+      {
+        "name": "Charger Rating System",
+        "description": "User rating system for individual chargers with star ratings and feedback collection",
+        "files": [
+          "src/components/ChargerRating.tsx",
+          "src/hooks/useChargerRating.ts"
+        ]
+      },
+      {
+        "name": "Status Update System",
+        "description": "Real-time charger status reporting and updating system for community-driven data accuracy",
+        "files": [
+          "src/components/StatusUpdateModal.tsx",
+          "src/pages/UpdateStatusScreen.tsx",
+          "src/hooks/useRecentReports.ts"
+        ]
+      },
+      {
+        "name": "Location Services",
+        "description": "Geolocation integration for finding user location, calculating distances, and providing directions",
+        "files": [
+          "src/hooks/useLocation.ts",
+          "src/utils/distance.ts",
+          "src/utils/directions.ts"
+        ]
+      },
+      {
+        "name": "Recent Locations Management",
+        "description": "System for tracking and displaying recently viewed charging stations with local storage persistence",
+        "files": [
+          "src/components/RecentLocations.tsx",
+          "src/hooks/useRecentStations.ts"
+        ]
+      },
+      {
+        "name": "Offline Support",
+        "description": "Progressive Web App capabilities with offline caching, service worker, and offline status detection",
+        "files": [
+          "src/hooks/useOfflineCache.ts",
+          "src/hooks/useOnlineStatus.ts",
+          "src/components/OfflineIndicator.tsx",
+          "public/sw.js"
+        ]
+      },
+      {
+        "name": "PWA Installation",
+        "description": "Progressive Web App installation banner and management for mobile app-like experience",
+        "files": [
+          "src/components/PWAInstallBanner.tsx",
+          "src/hooks/usePWA.ts",
+          "public/site.webmanifest"
+        ]
+      },
+      {
+        "name": "Analytics and Tracking",
+        "description": "User interaction analytics for tracking station views, searches, and user behavior patterns",
+        "files": [
+          "src/hooks/useAnalytics.ts"
+        ]
+      },
+      {
+        "name": "Mobile-Responsive UI",
+        "description": "Mobile-first responsive design with touch-friendly interfaces and mobile-specific optimizations",
+        "files": [
+          "src/hooks/use-mobile.tsx",
+          "src/styles/mobile-enhancements.css",
+          "src/components/BottomSheet.tsx"
+        ]
+      },
+      {
+        "name": "Charging Utilities",
+        "description": "Utility functions for charging calculations, power categorization, and optimal charger selection",
+        "files": [
+          "src/utils/charging.ts"
+        ]
+      },
+      {
+        "name": "Error Handling",
+        "description": "Comprehensive error boundary system with graceful error handling and user-friendly error messages",
+        "files": [
+          "src/components/ErrorBoundary.tsx"
+        ]
+      },
+      {
+        "name": "UI Component Library",
+        "description": "Complete shadcn/ui component library with custom styling and consistent design system",
+        "files": [
+          "src/components/ui/button.tsx",
+          "src/components/ui/card.tsx",
+          "src/components/ui/dialog.tsx",
+          "src/components/ui/input.tsx",
+          "src/components/ui/badge.tsx",
+          "src/components/ui/skeleton.tsx",
+          "src/components/ui/toast.tsx",
+          "src/components/ui/sheet.tsx",
+          "src/components/ui/slider.tsx",
+          "src/lib/utils.ts"
+        ]
+      },
+      {
+        "name": "Database Schema Management",
+        "description": "Supabase database migrations and schema management for stations, chargers, ratings, and user analytics",
+        "files": [
+          "supabase/migrations/20250130000000_complete_plugshare_schema.sql",
+          "supabase/migrations/20250829160000_add_security_policies.sql",
+          "supabase/config.toml"
+        ]
+      },
+      {
+        "name": "Data Seeding System",
+        "description": "Scripts for populating the database with comprehensive charging station data for testing and development",
+        "files": [
+          "scripts/seed-database.js",
+          "scripts/seed-comprehensive-database.js",
+          "scripts/manual-seed.sql"
+        ]
+      },
+      {
+        "name": "PlugShare-like Interface",
+        "description": "Interface components mimicking PlugShare's design for familiar user experience",
+        "files": [
+          "src/components/PlugShareHeader.tsx",
+          "src/components/PlugShareMenu.tsx",
+          "src/components/PlugShareLegend.tsx"
+        ]
+      },
+      {
+        "name": "Search Interface",
+        "description": "Dedicated search bar component with autocomplete and search suggestions",
+        "files": [
+          "src/components/SearchBar.tsx"
+        ]
+      }
+    ]
+  }
+}

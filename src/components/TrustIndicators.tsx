@@ -17,7 +17,7 @@ export const TrustIndicators: React.FC<TrustIndicatorsProps> = ({
   verificationCount,
   ratingScore,
   ratingCount,
-  lastUpdateTimestamp,
+  // lastUpdateTimestamp,
   className = "",
 }) => {
   const getVerificationBadge = () => {

@@ -9,7 +9,7 @@ interface OfflineUpdate {
   timestamp: string;
 }
 
-export const useOfflineCache = <T = any>() => {
+export const useOfflineCache = <T = unknown>() => {
   const { isOnline } = useOnlineStatus();
   const { toast } = useToast();
   const [pendingUpdates, setPendingUpdates] = useState<OfflineUpdate[]>([]);
