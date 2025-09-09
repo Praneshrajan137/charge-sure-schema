@@ -5,18 +5,25 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  server: {
-    host: "::",
-    port: 8080,
-  },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+	server: {
+		host: "::",
+		port: 8080,
+		hmr: {
+			// Browser is accessed via 8082 (reverse proxy/static host), dev server runs on 8080.
+			clientPort: 8082,
+			port: 8080,
+			protocol: "ws",
+			host: "localhost",
+		},
+	},
+	plugins: [
+		react(),
+		mode === 'development' &&
+		componentTagger(),
+	].filter(Boolean),
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "./src"),
+		},
+	},
 }));

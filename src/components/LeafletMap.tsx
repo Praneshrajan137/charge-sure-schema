@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { LatLngExpression, Icon, DivIcon } from 'leaflet';
+import { LatLngExpression, DivIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default markers in React Leaflet
@@ -78,7 +78,7 @@ interface Station {
   address: string;
   latitude: number;
   longitude: number;
-  chargers: Array<{
+  chargers?: Array<{
     current_status: string;
     plug_type: string;
     max_power_kw: number;
@@ -145,15 +145,18 @@ export const LeafletMap = ({ stations, userLocation, onStationClick, className =
 
         {/* Charging station markers */}
         {stations.map((station) => {
-          const availableChargers = station.chargers.filter(c => 
-            c.current_status?.toLowerCase() === 'available'
+          const chargers = Array.isArray(station.chargers) ? station.chargers : [];
+          const availableChargers = chargers.filter(c => 
+            c?.current_status?.toLowerCase() === 'available'
           ).length;
           
           const status = availableChargers > 0 ? 'available' : 
-                        station.chargers.some(c => c.current_status?.toLowerCase() === 'in use') ? 'in use' :
+                        chargers.some(c => c?.current_status?.toLowerCase() === 'in use') ? 'in use' :
                         'out of service';
           
-          const maxPower = Math.max(...station.chargers.map(c => c.max_power_kw));
+          const maxPower = chargers.length > 0
+            ? Math.max(...chargers.map(c => c?.max_power_kw || 0))
+            : 0;
           
           return (
             <Marker
@@ -172,7 +175,7 @@ export const LeafletMap = ({ stations, userLocation, onStationClick, className =
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs">
                       <span>Available:</span>
-                      <span className="font-medium">{availableChargers}/{station.chargers.length}</span>
+                      <span className="font-medium">{availableChargers}/{chargers.length}</span>
                     </div>
                     <div className="flex justify-between text-xs">
                       <span>Max Power:</span>
@@ -190,17 +193,17 @@ export const LeafletMap = ({ stations, userLocation, onStationClick, className =
                     </div>
                   </div>
 
-                  {station.chargers.length > 0 && (
+                  {chargers.length > 0 && (
                     <div className="mt-2 pt-2 border-t">
                       <p className="text-xs font-medium mb-1">Chargers:</p>
-                      {station.chargers.slice(0, 3).map((charger, idx) => (
+                      {chargers.slice(0, 3).map((charger, idx) => (
                         <div key={idx} className="text-xs flex justify-between">
                           <span>{charger.plug_type}</span>
                           <span>{charger.max_power_kw}kW</span>
                         </div>
                       ))}
-                      {station.chargers.length > 3 && (
-                        <p className="text-xs text-gray-500">+{station.chargers.length - 3} more</p>
+                      {chargers.length > 3 && (
+                        <p className="text-xs text-gray-500">+{chargers.length - 3} more</p>
                       )}
                     </div>
                   )}

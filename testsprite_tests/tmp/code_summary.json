@@ -3,273 +3,134 @@
     "TypeScript",
     "React 18",
     "Vite",
-    "Tailwind CSS",
-    "shadcn/ui",
-    "Zustand",
-    "Leaflet / react-leaflet",
     "Supabase (PostgreSQL)",
-    "ESLint"
+    "Leaflet (OpenStreetMap)",
+    "Tailwind CSS",
+    "shadcn/ui (Radix)",
+    "Zustand",
+    "TanStack Query",
+    "ESLint 9",
+    "SW/PWA"
   ],
   "features": [
     {
-      "name": "App Shell and Layout",
-      "description": "Application root rendering header, sidebar, map, and station list with global state and error boundaries.",
+      "name": "App shell & routing",
+      "description": "Main application shell with React Router, React Query, ErrorBoundary, and routes to pages.",
       "files": [
         "src/App.tsx",
-        "src/components/Header.tsx",
-        "src/components/Sidebar.tsx",
-        "src/components/StationList.tsx",
-        "src/components/ErrorBoundary.tsx",
-        "src/components/LoadingSpinner.tsx"
+        "src/main.tsx",
+        "src/pages/Index.tsx",
+        "src/pages/StationsListPage.tsx",
+        "src/pages/UpdateStatusScreen.tsx",
+        "src/pages/FiltersPage.tsx",
+        "src/pages/NotFound.tsx"
       ]
     },
     {
       "name": "Map (Leaflet)",
-      "description": "Interactive OpenStreetMap/Leaflet map with custom markers, bounds/zoom syncing, and legend.",
+      "description": "Leaflet map integration and map components for displaying stations and user location.",
       "files": [
+        "src/components/LeafletMap.tsx",
         "src/components/Map/MapComponent.tsx",
         "src/components/Map.tsx"
       ]
     },
     {
-      "name": "Global State (Zustand)",
-      "description": "Centralized UI, map, filters, and data state with actions and persistence.",
+      "name": "PlugShare UI",
+      "description": "Header, sidebar, legend, filters and related UI for PlugShare-like experience.",
       "files": [
-        "src/store/useAppStore.ts"
-      ]
-    },
-    {
-      "name": "API Service (Supabase)",
-      "description": "Data layer fetching stations and related entities from Supabase and transforming to app models.",
-      "files": [
-        "src/services/api.ts",
-        "src/integrations/supabase/client.ts",
-        "src/integrations/supabase/types.ts"
-      ]
-    },
-    {
-      "name": "Types",
-      "description": "Shared application domain types.",
-      "files": [
-        "src/types/index.ts"
-      ]
-    },
-    {
-      "name": "Search and Filters",
-      "description": "Enhanced station search and UI filters integration.",
-      "files": [
-        "src/components/EnhancedSearch.tsx",
-        "src/components/Sidebar.tsx"
-      ]
-    },
-    {
-      "name": "PWA and Offline",
-      "description": "Service worker and offline cache utilities.",
-      "files": [
-        "public/sw.js",
-        "src/hooks/useOfflineCache.ts"
-      ]
-    },
-    {
-      "name": "Analytics",
-      "description": "Hook for tracking user events to Supabase.",
-      "files": [
-        "src/hooks/useAnalytics.ts"
-      ]
-    }
-  ]
-}
-{
-  "tech_stack": [
-    "TypeScript",
-    "React 18",
-    "Vite",
-    "Supabase",
-    "PostgreSQL",
-    "OpenStreetMap",
-    "Leaflet",
-    "React-Leaflet",
-    "Tailwind CSS",
-    "shadcn/ui",
-    "React Query",
-    "React Router",
-    "PWA"
-  ],
-  "features": [
-    {
-      "name": "Interactive Map Display",
-      "description": "OpenStreetMap-based interactive map showing EV charging stations with custom markers, user location, and station popups",
-      "files": [
-        "src/components/Map.tsx",
-        "src/utils/distance.ts"
-      ]
-    },
-    {
-      "name": "Station Data Management",
-      "description": "Comprehensive system for fetching, caching, and managing EV charging station data from Supabase database",
-      "files": [
-        "src/hooks/useStations.ts",
-        "src/integrations/supabase/client.ts",
-        "src/integrations/supabase/types.ts"
-      ]
-    },
-    {
-      "name": "Station Search and Filtering",
-      "description": "Advanced search functionality with text search, plug type filtering, availability filtering, and location-based sorting",
-      "files": [
-        "src/components/EnhancedSearch.tsx",
-        "src/components/FilterChips.tsx",
+        "src/components/PlugShareHeader.tsx",
+        "src/components/PlugShareSidebar.tsx",
+        "src/components/PlugShareLegend.tsx",
+        "src/components/PlugShareFilters.tsx",
+        "src/components/PlugShareMenu.tsx",
+        "src/components/PlugShareLegend.tsx",
         "src/components/PlugShareFilters.tsx"
       ]
     },
     {
-      "name": "Station List Display",
-      "description": "Scrollable list of charging stations with detailed information, distance calculations, and sorting capabilities",
+      "name": "Station listing & details",
+      "description": "Station list, cards, details modal, enhanced details view.",
       "files": [
         "src/components/StationsList.tsx",
-        "src/components/LoadingSkeleton.tsx"
-      ]
-    },
-    {
-      "name": "Station Details Modal",
-      "description": "Comprehensive modal displaying detailed station information, charger specifications, ratings, and trust indicators",
-      "files": [
+        "src/components/StationList.tsx",
+        "src/components/StationCard.tsx",
         "src/components/StationDetailsModal.tsx",
-        "src/components/EnhancedStationDetails.tsx",
-        "src/components/TrustIndicators.tsx"
+        "src/components/EnhancedStationDetails.tsx"
       ]
     },
     {
-      "name": "Charger Rating System",
-      "description": "User rating system for individual chargers with star ratings and feedback collection",
+      "name": "Search & filters",
+      "description": "Search bars, enhanced search, filter chips, recent locations.",
       "files": [
-        "src/components/ChargerRating.tsx",
-        "src/hooks/useChargerRating.ts"
+        "src/components/SearchBar.tsx",
+        "src/components/EnhancedSearch.tsx",
+        "src/components/FilterChips.tsx",
+        "src/components/RecentLocations.tsx"
       ]
     },
     {
-      "name": "Status Update System",
-      "description": "Real-time charger status reporting and updating system for community-driven data accuracy",
+      "name": "Common UI components",
+      "description": "Shared components like header, bottom nav, bottom sheet, spinners, skeletons, toast, etc.",
       "files": [
-        "src/components/StatusUpdateModal.tsx",
-        "src/pages/UpdateStatusScreen.tsx",
-        "src/hooks/useRecentReports.ts"
+        "src/components/ChargeSureHeader.tsx",
+        "src/components/Header.tsx",
+        "src/components/BottomNavigation.tsx",
+        "src/components/BottomSheet.tsx",
+        "src/components/LoadingSpinner.tsx",
+        "src/components/LoadingSkeleton.tsx",
+        "src/components/ErrorBoundary.tsx",
+        "src/components/ui/*"
       ]
     },
     {
-      "name": "Location Services",
-      "description": "Geolocation integration for finding user location, calculating distances, and providing directions",
+      "name": "Hooks & state",
+      "description": "Custom hooks for stations, geolocation, offline cache, online status, analytics, PWA, recent items, and Zustand store.",
       "files": [
+        "src/hooks/useStations.ts",
+        "src/hooks/useGeolocation.ts",
         "src/hooks/useLocation.ts",
-        "src/utils/distance.ts",
-        "src/utils/directions.ts"
-      ]
-    },
-    {
-      "name": "Recent Locations Management",
-      "description": "System for tracking and displaying recently viewed charging stations with local storage persistence",
-      "files": [
-        "src/components/RecentLocations.tsx",
-        "src/hooks/useRecentStations.ts"
-      ]
-    },
-    {
-      "name": "Offline Support",
-      "description": "Progressive Web App capabilities with offline caching, service worker, and offline status detection",
-      "files": [
         "src/hooks/useOfflineCache.ts",
         "src/hooks/useOnlineStatus.ts",
-        "src/components/OfflineIndicator.tsx",
-        "public/sw.js"
-      ]
-    },
-    {
-      "name": "PWA Installation",
-      "description": "Progressive Web App installation banner and management for mobile app-like experience",
-      "files": [
-        "src/components/PWAInstallBanner.tsx",
+        "src/hooks/useAnalytics.ts",
         "src/hooks/usePWA.ts",
-        "public/site.webmanifest"
+        "src/hooks/useRecentStations.ts",
+        "src/hooks/useRecentReports.ts",
+        "src/store/useAppStore.ts"
       ]
     },
     {
-      "name": "Analytics and Tracking",
-      "description": "User interaction analytics for tracking station views, searches, and user behavior patterns",
+      "name": "Supabase integration",
+      "description": "Supabase client and generated types, database migrations.",
       "files": [
-        "src/hooks/useAnalytics.ts"
-      ]
-    },
-    {
-      "name": "Mobile-Responsive UI",
-      "description": "Mobile-first responsive design with touch-friendly interfaces and mobile-specific optimizations",
-      "files": [
-        "src/hooks/use-mobile.tsx",
-        "src/styles/mobile-enhancements.css",
-        "src/components/BottomSheet.tsx"
-      ]
-    },
-    {
-      "name": "Charging Utilities",
-      "description": "Utility functions for charging calculations, power categorization, and optimal charger selection",
-      "files": [
-        "src/utils/charging.ts"
-      ]
-    },
-    {
-      "name": "Error Handling",
-      "description": "Comprehensive error boundary system with graceful error handling and user-friendly error messages",
-      "files": [
-        "src/components/ErrorBoundary.tsx"
-      ]
-    },
-    {
-      "name": "UI Component Library",
-      "description": "Complete shadcn/ui component library with custom styling and consistent design system",
-      "files": [
-        "src/components/ui/button.tsx",
-        "src/components/ui/card.tsx",
-        "src/components/ui/dialog.tsx",
-        "src/components/ui/input.tsx",
-        "src/components/ui/badge.tsx",
-        "src/components/ui/skeleton.tsx",
-        "src/components/ui/toast.tsx",
-        "src/components/ui/sheet.tsx",
-        "src/components/ui/slider.tsx",
-        "src/lib/utils.ts"
-      ]
-    },
-    {
-      "name": "Database Schema Management",
-      "description": "Supabase database migrations and schema management for stations, chargers, ratings, and user analytics",
-      "files": [
-        "supabase/migrations/20250130000000_complete_plugshare_schema.sql",
-        "supabase/migrations/20250829160000_add_security_policies.sql",
+        "src/integrations/supabase/client.ts",
+        "src/integrations/supabase/types.ts",
+        "supabase/migrations/*",
         "supabase/config.toml"
       ]
     },
     {
-      "name": "Data Seeding System",
-      "description": "Scripts for populating the database with comprehensive charging station data for testing and development",
+      "name": "Services and utils",
+      "description": "API services, utility helpers for distance, directions, charging utils, and general utils.",
       "files": [
-        "scripts/seed-database.js",
-        "scripts/seed-comprehensive-database.js",
-        "scripts/manual-seed.sql"
+        "src/services/api.ts",
+        "src/utils/distance.ts",
+        "src/utils/directions.ts",
+        "src/utils/charging.ts",
+        "src/lib/utils.ts"
       ]
     },
     {
-      "name": "PlugShare-like Interface",
-      "description": "Interface components mimicking PlugShare's design for familiar user experience",
+      "name": "Styling & config",
+      "description": "Global styles, Tailwind, PostCSS, Vite config, ESLint config.",
       "files": [
-        "src/components/PlugShareHeader.tsx",
-        "src/components/PlugShareMenu.tsx",
-        "src/components/PlugShareLegend.tsx"
-      ]
-    },
-    {
-      "name": "Search Interface",
-      "description": "Dedicated search bar component with autocomplete and search suggestions",
-      "files": [
-        "src/components/SearchBar.tsx"
+        "src/globals.css",
+        "src/index.css",
+        "src/styles/mobile-enhancements.css",
+        "tailwind.config.ts",
+        "postcss.config.js",
+        "vite.config.ts",
+        "eslint.config.js"
       ]
     }
   ]

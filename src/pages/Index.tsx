@@ -1,16 +1,8 @@
-<<<<<<< HEAD
-import { useState, useMemo, useEffect } from "react";
-import { MapComponent } from "@/components/Map/MapComponent";
+import { useState, useMemo, useEffect, Suspense, lazy } from "react";
 import StationsList from "@/components/StationsList";
 import { FilterChips } from "@/components/FilterChips";
 import OfflineIndicator from "@/components/OfflineIndicator";
 import { EnhancedSearch } from "@/components/EnhancedSearch";
-=======
-import { useState, useMemo } from "react";
-import Map from "@/components/Map";
-import OfflineIndicator from "@/components/OfflineIndicator";
-import { PlugShareHeader } from "@/components/PlugShareHeader";
->>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { StationsListSkeleton, MapSkeleton } from "@/components/LoadingSkeleton";
 import { useLocation } from "@/hooks/useLocation";
@@ -21,24 +13,41 @@ import type { Station } from "@/hooks/useStations";
 import { Card, CardContent } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import PlugShareHeader from "@/components/PlugShareHeader";
+
+const MapComponent = lazy(() =>
+	import("@/components/Map/MapComponent").then((m) => ({ default: m.MapComponent })),
+);
 
 export default function Index() {
-  // 1. State Initialization
-  const [stations, setStations] = useState<Station[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  
-  const { location } = useLocation();
-  const { recentStations } = useRecentStations();
-  const [searchQuery, setSearchQuery] = useState("");
+	// 1) State Management
+	const [stations, setStations] = useState<Station[]>([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<Error | null>(null);
+	const [activeFilter, setActiveFilter] = useState<"available" | "fast" | "recent" | "all">("all");
 
-  // 2. Data Fetching Logic
-  useEffect(() => {
-    const fetchStations = async () => {
-      try {
-        const { data, error: supabaseError } = await supabase
-          .from("stations")
-          .select(`
+	const { location } = useLocation();
+	const { recentStations } = useRecentStations();
+	const safeRecentStations = Array.isArray(recentStations) ? recentStations : [];
+
+	const [searchQuery, setSearchQuery] = useState("");
+	const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+	// Debounce search input
+	useEffect(() => {
+		const id = setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
+		return () => clearTimeout(id);
+	}, [searchQuery]);
+
+	// 2) Data Fetching Logic
+	useEffect(() => {
+		let isMounted = true;
+
+		const fetchStations = async () => {
+			try {
+				const { data, error: supabaseError } = await supabase
+					.from("stations")
+					.select(`
             station_id,
             name,
             address,
@@ -57,244 +66,212 @@ export default function Index() {
             )
           `);
 
-        if (supabaseError) {
-          throw new Error(`Failed to fetch stations: ${supabaseError.message}`);
-        }
+				if (supabaseError) {
+					throw new Error(`Failed to fetch stations: ${supabaseError.message}`);
+				}
 
-        const formattedStations: Station[] = (data || []).map(station => ({
-          station_id: station.station_id,
-          name: station.name,
-          address: station.address,
-          latitude: Number(station.latitude),
-          longitude: Number(station.longitude),
-          chargers: (station.chargers || []).map(charger => ({
-            charger_id: charger.charger_id,
-            plug_type: charger.plug_type,
-            max_power_kw: charger.max_power_kw,
-            current_status: charger.current_status as "Available" | "In Use" | "Out of Service",
-            last_update_timestamp: String(charger.last_update_timestamp ?? ""),
-            last_verified_at: charger.last_verified_at ?? undefined,
-            verification_count: charger.verification_count ?? undefined,
-            rating_score: charger.rating_score ?? undefined,
-            rating_count: charger.rating_count ?? undefined,
-          }))
-        }));
+				if (!isMounted) return;
 
-        setStations(formattedStations);
-      } catch (fetchError) {
-        setError(fetchError as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+				const formatted: Station[] = (data || []).map((s) => ({
+					station_id: s.station_id,
+					name: s.name,
+					address: s.address,
+					latitude: Number(s.latitude),
+					longitude: Number(s.longitude),
+					chargers: (s.chargers || []).map((c: any) => ({
+						charger_id: c.charger_id,
+						plug_type: c.plug_type,
+						max_power_kw: c.max_power_kw,
+						current_status: (c.current_status as "Available" | "In Use" | "Out of Service") ?? "Out of Service",
+						last_update_timestamp: String(c.last_update_timestamp ?? ""),
+						last_verified_at: c.last_verified_at ?? undefined,
+						verification_count: c.verification_count ?? undefined,
+						rating_score: c.rating_score ?? undefined,
+						rating_count: c.rating_count ?? undefined,
+					})),
+				}));
 
-    fetchStations();
-  }, []);
+				setStations(formatted);
+			} catch (err) {
+				if (!isMounted) return;
+				setError(err as Error);
+			} finally {
+				if (!isMounted) return;
+				setIsLoading(false);
+			}
+		};
 
-  // Filter and search stations
-  const filteredStations = useMemo(() => {
-    if (!Array.isArray(stations)) return [];
-    
-    let filtered = stations;
+		fetchStations();
+		return () => {
+			isMounted = false;
+		};
+	}, []);
 
-    // Apply text search
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(station => 
-        station?.name?.toLowerCase().includes(query) ||
-        station?.address?.toLowerCase().includes(query) ||
-        (station?.chargers && Array.isArray(station.chargers) && station.chargers.some(charger => 
-          charger?.plug_type?.toLowerCase().includes(query)
-        ))
-      );
-    }
+	// 3) useMemo Hook Correction (guard + deps)
+	const filteredStations = useMemo(() => {
+		if (!stations || stations.length === 0) return [];
 
-<<<<<<< HEAD
-    // Apply filters
-    if (activeFilter === "available") {
-      filtered = filtered.filter(station => 
-        station?.chargers && Array.isArray(station.chargers) && station.chargers.some(charger => charger?.current_status === "Available")
-      );
-    } else if (activeFilter === "fast") {
-      filtered = filtered.filter(station => 
-        station?.chargers && Array.isArray(station.chargers) && station.chargers.some(charger => charger?.max_power_kw >= 50)
-      );
-    } else if (activeFilter === "recent" && recentStations.length > 0) {
-      const recentIds = new Set(recentStations.map(r => r.station_id));
-      filtered = filtered.filter(station => recentIds.has(station?.station_id));
-    }
+		let result = stations;
 
-=======
->>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
-    return filtered;
-  }, [stations, searchQuery]);
+		// Text search (debounced)
+		if (debouncedSearchQuery) {
+			const q = debouncedSearchQuery.toLowerCase();
+			result = result.filter(
+				(station) =>
+					station?.name?.toLowerCase().includes(q) ||
+					station?.address?.toLowerCase().includes(q) ||
+					(Array.isArray(station?.chargers) &&
+						station.chargers.some((c) => c?.plug_type?.toLowerCase().includes(q))),
+			);
+		}
 
-  // Sort stations by distance if location is available
-  const sortedStations = useMemo(() => {
-    if (!location || !Array.isArray(filteredStations)) return filteredStations;
-    
-    return [...filteredStations].sort((a, b) => {
-      if (!a?.latitude || !a?.longitude || !b?.latitude || !b?.longitude) return 0;
-      
-      const distanceA = calculateDistance(
-        { latitude: location.latitude, longitude: location.longitude },
-        { latitude: a.latitude, longitude: a.longitude }
-      );
-      const distanceB = calculateDistance(
-        { latitude: location.latitude, longitude: location.longitude },
-        { latitude: b.latitude, longitude: b.longitude }
-      );
-      return distanceA - distanceB;
-    });
-  }, [filteredStations, location]);
+		// Filters
+		if (activeFilter === "available") {
+			result = result.filter(
+				(station) =>
+					Array.isArray(station?.chargers) &&
+					stations &&
+					station.chargers.some((c) => c?.current_status === "Available"),
+			);
+		} else if (activeFilter === "fast") {
+			result = result.filter(
+				(station) =>
+					Array.isArray(station?.chargers) &&
+					station.chargers.some((c) => (c?.max_power_kw ?? 0) >= 50),
+			);
+		} else if (activeFilter === "recent" && safeRecentStations.length > 0) {
+			const recentIds = new Set(safeRecentStations.map((r) => r.station_id));
+			result = result.filter((station) => recentIds.has(station?.station_id));
+		}
 
-  // 3. Conditional Rendering in UI
-  if (isLoading) {
-    return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-background">
-          <OfflineIndicator />
-          
-          <div className="container mx-auto p-4 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">
-                EV Charging Stations
-              </h1>
-              <p className="text-muted-foreground">
-                Find and update electric vehicle charging stations near you
-              </p>
-            </div>
+		return result;
+	}, [stations, debouncedSearchQuery, activeFilter, safeRecentStations]);
 
-            <div className="space-y-4">
-              <div className="max-w-md mx-auto h-10 bg-muted rounded animate-pulse" />
-              <div className="flex gap-2 justify-center">
-                <div className="h-8 w-20 bg-muted rounded animate-pulse" />
-                <div className="h-8 w-16 bg-muted rounded animate-pulse" />
-                <div className="h-8 w-18 bg-muted rounded animate-pulse" />
-              </div>
-            </div>
+	// Sort by distance
+	const sortedStations = useMemo(() => {
+		if (!location || filteredStations.length === 0) return filteredStations;
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
-              <div className="bg-card rounded-lg shadow-sm border">
-                <MapSkeleton />
-              </div>
-              
-              <div className="overflow-hidden">
-                <StationsListSkeleton />
-              </div>
-            </div>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
+		return [...filteredStations].sort((a, b) => {
+			if (!a?.latitude || !a?.longitude || !b?.latitude || !b?.longitude) return 0;
 
-  if (error) {
-    return (
-      <ErrorBoundary>
-        <div className="min-h-screen bg-background">
-          <OfflineIndicator />
-          
-          <div className="container mx-auto p-4 space-y-6">
-            <div className="text-center space-y-2">
-              <h1 className="text-3xl font-bold text-foreground">
-                EV Charging Stations
-              </h1>
-              <p className="text-muted-foreground">
-                Find and update electric vehicle charging stations near you
-              </p>
-            </div>
+			const distanceA = calculateDistance(
+				{ latitude: location.latitude, longitude: location.longitude },
+				{ latitude: a.latitude, longitude: a.longitude },
+			);
+			const distanceB = calculateDistance(
+				{ latitude: location.latitude, longitude: location.longitude },
+				{ latitude: b.latitude, longitude: b.longitude },
+			);
+			return distanceA - distanceB;
+		});
+	}, [filteredStations, location]);
 
-            <div className="flex items-center justify-center min-h-[400px] p-4">
-              <Card className="max-w-md w-full">
-                <CardContent className="p-6 text-center space-y-4">
-                  <div className="mx-auto h-12 w-12 text-destructive">
-                    <AlertTriangle size={48} />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-lg">Failed to Load Stations</h3>
-                    <p className="text-muted-foreground text-sm">
-                      {error.message}
-                    </p>
-                  </div>
-                  <Button onClick={() => window.location.reload()} className="w-full">
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Try Again
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </ErrorBoundary>
-    );
-  }
+	// 4) Conditional Rendering
+	if (isLoading) {
+		return (
+			<ErrorBoundary>
+				<div className="min-h-screen bg-background">
+					<OfflineIndicator />
+					<div className="container mx-auto p-4 space-y-6">
+						<div className="space-y-4">
+							<div className="max-w-md mx-auto h-10 bg-muted rounded animate-pulse" />
+							<div className="flex gap-2 justify-center">
+								<div className="h-8 w-20 bg-muted rounded animate-pulse" />
+								<div className="h-8 w-16 bg-muted rounded animate-pulse" />
+								<div className="h-8 w-18 bg-muted rounded animate-pulse" />
+							</div>
+						</div>
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
+							<div className="bg-card rounded-lg shadow-sm border">
+								<MapSkeleton />
+							</div>
+							<div className="overflow-hidden">
+								<StationsListSkeleton />
+							</div>
+						</div>
+					</div>
+				</div>
+			</ErrorBoundary>
+		);
+	}
 
-  return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-background flex flex-col">
-        <OfflineIndicator />
-        
-<<<<<<< HEAD
-        <div className="container mx-auto p-4 space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-foreground">
-              EV Charging Stations
-            </h1>
-            <p className="text-muted-foreground">
-              Find and update electric vehicle charging stations near you
-            </p>
-          </div>
+	if (error) {
+		return (
+			<ErrorBoundary>
+				<div className="min-h-screen bg-background">
+					<OfflineIndicator />
+					<div className="container mx-auto p-4 space-y-6">
+						<div className="flex items-center justify-center min-h-[400px] p-4">
+							<Card className="max-w-md w-full">
+								<CardContent className="p-6 text-center space-y-4">
+									<div className="mx-auto h-12 w-12 text-destructive">
+										<AlertTriangle size={48} />
+									</div>
+									<div className="space-y-2">
+										<h3 className="font-semibold text-lg">Failed to Load Stations</h3>
+										<p className="text-muted-foreground text-sm">{error.message}</p>
+									</div>
+									<Button onClick={() => window.location.reload()} className="w-full">
+										<RefreshCw className="mr-2 h-4 w-4" />
+										Try Again
+									</Button>
+								</CardContent>
+							</Card>
+						</div>
+					</div>
+				</div>
+			</ErrorBoundary>
+		);
+	}
 
-          <div className="space-y-4">
-            <EnhancedSearch
-              value={searchQuery}
-              onChange={setSearchQuery}
-              placeholder="Search by station name, address, or plug type..."
-              stations={stations}
-              showFilters={false}
-              className="max-w-md mx-auto"
-            />
-            
-            <FilterChips 
-              activeFilter={activeFilter} 
-              onFilterChange={setActiveFilter}
-              locationEnabled={!!location}
-              hasRecentStations={recentStations.length > 0}
-            />
-          </div>
+	// Main UI
+	return (
+		<ErrorBoundary>
+			<div className="min-h-screen bg-background flex flex-col">
+				<OfflineIndicator />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
-            <div className="bg-card rounded-lg shadow-sm border">
-              <div className="h-full">
-                <MapComponent />
-              </div>
-            </div>
-            
-            <div className="overflow-hidden">
-              <StationsList 
-                stations={sortedStations} 
-                selectedPlugTypes={[]}
-                showAvailableOnly={false}
-                userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
-                onStationClick={() => {}}
-              />
-            </div>
-          </div>
-=======
-        <PlugShareHeader onSearch={setSearchQuery} />
-        
-        <div className="flex-1 relative">
-          <Map 
-            stations={sortedStations} 
-            selectedPlugTypes={[]}
-            showAvailableOnly={false}
-            userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
-            onStationClick={() => {}}
-          />
->>>>>>> 62fe526454f3ea9e436e9defb8bb67902930024d
-        </div>
-      </div>
-    </ErrorBoundary>
-  );
+				<PlugShareHeader onSearch={(q) => setSearchQuery(q)} />
+
+				<div className="container mx-auto p-4 space-y-6">
+					<div className="space-y-4">
+						<EnhancedSearch
+							value={searchQuery}
+							onChange={setSearchQuery}
+							placeholder="Search by station name, address, or plug type..."
+							stations={stations}
+							showFilters={false}
+							className="max-w-md mx-auto"
+						/>
+
+						<FilterChips
+							activeFilter={activeFilter}
+							onFilterChange={(f) => setActiveFilter((f ?? "all") as any)}
+							locationEnabled={!!location}
+							hasRecentStations={safeRecentStations.length > 0}
+						/>
+					</div>
+
+					<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-300px)]">
+						<div className="bg-card rounded-lg shadow-sm border">
+							<div className="h-full">
+								<Suspense fallback={<MapSkeleton />}>
+									<MapComponent />
+								</Suspense>
+							</div>
+						</div>
+
+						<div className="overflow-hidden">
+							<StationsList
+								stations={sortedStations}
+								selectedPlugTypes={[]}
+								showAvailableOnly={false}
+								userLocation={location ? { latitude: location.latitude, longitude: location.longitude } : null}
+								onStationClick={() => {}}
+							/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ErrorBoundary>
+	);
 }
